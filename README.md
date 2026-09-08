@@ -4,7 +4,7 @@
 
 A final-year M.Sc Computer Science project to observe network metadata on a Windows laptop, build behavioural baselines, identify unusual activity, and support evidence-based incident investigation through a web dashboard.
 
-**Status: Sprint 0 — planning foundation only.** There is no runnable application, installed project environment, or implemented detection capability yet.
+**Status: Sprint 1 Phase 1B — real packet capture demonstrated.** Npcap/Scapy captured controlled bidirectional TCP and UDP on the laptop's USB network interface and produced bounded flow summaries. Full Sprint 1 is PARTIALLY PASSED: sustained resource, reference and feature-contract gates remain. There is no web application or detection capability.
 
 ## Intended system
 
@@ -42,4 +42,20 @@ LIVE uses actual observable metadata. SIMULATION uses clearly labelled synthetic
 - [Testing strategy](docs/TESTING_STRATEGY.md)
 - [Strict architecture and feasibility review](docs/ARCHITECTURE_REVIEW.md)
 
-Start with the roadmap's exact Windows feasibility gates when implementation is authorized. Full Wi-Fi visibility, Mobile Hotspot traffic attribution and per-remote-device models are experimental. The MVP is host monitoring, transparent detection, basic investigation and a labelled demonstration; advanced features cannot delay final evaluation. No installation or run commands are provided because implementation has not started.
+Full Wi-Fi visibility, Mobile Hotspot traffic attribution and per-remote-device models remain experimental. See the [Sprint 1 evidence and limitations](docs/SPRINT1_FEASIBILITY_REPORT.md).
+
+## Standalone sensor (PowerShell, Python 3.11)
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-sensor.txt
+.\.venv\Scripts\python.exe -m sensor.cli interfaces
+.\.venv\Scripts\python.exe -m sensor.cli capture-interfaces
+.\.venv\Scripts\python.exe -m sensor.cli counters --interface "Ethernet 3" --samples 5
+.\.venv\Scripts\python.exe -m sensor.cli capture --interface "Ethernet 3" --duration 10
+.\.venv\Scripts\python.exe -m unittest discover -s tests/sensor -v
+```
+
+Select the actual active interface from enumeration; never assume the example alias remains active. Omit `--samples` for continuous counters; Ctrl+C stops. Counters emit LIVE OS totals, deltas and bytes/second. Capture requires manually installed Npcap and prints LIVE ten-second IP flow summaries with endpoints, ports, directional counts, IP length ranges, timestamps and partial/loss status. Default duration is 10 seconds, maximum 1800. Startup/shutdown windows may be partial. Packet objects are ephemeral; no payloads or capture files are stored. No backend is required.
+
+For an explicitly invoked controlled test, run `.\.venv\Scripts\python.exe tests/sensor/manual_live.py --interface "Ethernet 3"`. It captures for 24 seconds while this laptop sends one public HTTP HEAD request to 1.1.1.1:80 and one DNS query for example.com to 1.1.1.1:53. It verifies matched bidirectional flows, DNS lengths and aggregation conservation. It does not run during unit tests. Private IPs appear in local output; do not commit redirected output. This is a packet-feasibility check, not the complete Sprint 1 gate.

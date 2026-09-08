@@ -2,6 +2,8 @@
 
 This document plans future verification. No tests, environments or application checks were implemented or run in Sprint 0. Keep tests focused on consequential behaviour, independent expectations and failure modes rather than mirroring implementation.
 
+Phase 1B now has 32 sensor unit tests (`python -m unittest discover -s tests/sensor -v`) and an explicitly invoked `tests/sensor/manual_live.py --interface <alias>` hardware check. The latter sends one public HTTP HEAD and one DNS query from the selected local IPv4 address during bounded capture; it is never part of unit discovery. Unit fixtures transmit nothing. Evidence and remaining full-sprint gates are recorded in [SPRINT1_FEASIBILITY_REPORT.md](SPRINT1_FEASIBILITY_REPORT.md).
+
 ## Layers and acceptance evidence
 
 | Layer | Critical tests |

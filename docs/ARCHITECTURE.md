@@ -74,11 +74,13 @@ Keep REST polling as a visible fallback (every 5 seconds while the active page i
 | 005 | PostgreSQL plus post-commit socket hints | Simple durability; REST reconciliation required | Accepted |
 | 006 | Single ASGI process before Redis | Laptop simplicity; cannot scale workers with in-memory messaging | Provisional until runtime validation |
 | 007 | Offline training, sensor-local inference | Keeps requests fast; requires trusted artifact distribution and version handshake | Accepted |
-| 008 | Scapy-first capture spike, PyShark alternative | Select based on Windows correctness/overhead; neither is yet mandated | Open: Sprint 1 |
+| 008 | Scapy-first capture spike, PyShark alternative | Scapy 2.7.0 with Npcap 1.88 demonstrates Phase 1B host capture; PyShark is unnecessary for this evidence. Sustained overhead remains to measure. | Accepted for Phase 1B |
 | 009 | Host/interface-first observation | Remote-device attribution cannot be assumed from discovery/NAT; device models are experimental | Accepted |
 | 010 | Independent sensor and two publication cadences | Useful without backend/model; real samples every second, findings from finalized 10-second windows | Accepted |
 | 011 | Shared feature compatibility gate | Dataset column names alone do not establish live compatibility | Accepted |
 | 012 | Local CLI controls/lab launch before browser jobs | Avoids an undocumented task queue and remote privileged execution in MVP | Accepted |
 | 013 | Early age/row/disk telemetry budgets | A bounded capture queue does not bound PostgreSQL growth | Accepted |
+| 014 | Phase 1A psutil-only runtime; fail-closed capture preflight | Npcap was absent during Phase 1A. Pin tested psutil 7.2.2 on Python 3.11.0; pure metadata fixtures prove aggregation only. | Historical Phase 1A; capture portion superseded by ADR-015 |
+| 015 | One selected Npcap interface, Scapy AsyncSniffer and metadata-only queue | Phase 1B verifies Windows alias-to-index and Npcap mapping, store=False, non-promiscuous IP filter, callback normalization and independent timer-driven aggregation. Driver is manually installed. Queue/parser loss conservatively invalidates remaining session windows; kernel loss stays unknown. CLI prints summaries only; packet objects/payloads are not persisted. | Accepted for Phase 1B; full Sprint 1 remains partial |
 
-Logical future directories may be frontend/, backend/, sensor/, detection/, and tests/. These are design boundaries only; Sprint 0 creates none of them.
+Phases 1A/1B implement only sensor/ and tests/sensor/. Frontend, backend and detection remain future boundaries. Evidence is in [SPRINT1_FEASIBILITY_REPORT.md](SPRINT1_FEASIBILITY_REPORT.md).

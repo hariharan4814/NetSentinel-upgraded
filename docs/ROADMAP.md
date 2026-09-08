@@ -22,7 +22,7 @@ Prove that an independently runnable, metadata-only Python sensor can produce vi
 
 ## Mandatory Sprint 1 success criteria
 
-All eight criteria require recorded evidence; a proposal or source citation is not hardware validation. Store the future evidence in docs/SPRINT_1_FEASIBILITY.md with sanitized observations and commands/configuration, never private captures. That report is not created in Sprint 0.
+All eight criteria require recorded evidence; a proposal or source citation is not hardware validation. Store evidence in [SPRINT1_FEASIBILITY_REPORT.md](SPRINT1_FEASIBILITY_REPORT.md) with sanitized observations and commands/configuration, never private captures. Phases 1A/1B are authorized and recorded there. Phase 1B demonstrates real bidirectional TCP/UDP and flow aggregation on Ethernet 3; it does not complete all eight gates. The remaining sprints are not authorized by this implementation.
 
 | Gate | Required evidence to pass |
 | --- | --- |
