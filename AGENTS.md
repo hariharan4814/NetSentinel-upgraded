@@ -29,6 +29,10 @@ All documents above are under docs/. Update affected contracts and decisions wit
 - Use environment variables for secrets, migrations for schema changes, bounded buffers, explicit failures, UTC storage, and versioned ingestion/features/models/rules.
 - Preserve user work. Make only requested changes. Test important backend, ML, security, and provenance behaviour; report checks actually run and limitations.
 - Keep Windows and a student laptop as the reference environment. Select and pin compatible versions during the authorized setup sprint, not by guessing now.
+- Treat ROADMAP.md's Sprint 1 gates as prerequisites for advanced work. Baseline LIVE means one proven host/interface observation point; hotspot, monitor mode and remote-device attribution stay experimental until measured on the actual hardware.
+- The sensor must start, aggregate and show local results without Django, PostgreSQL, a model, or network access to the backend. Backend integration is an optional sink; local capture authorization still applies.
+- Implement only the MVP tier initially. Logical tables/apps/endpoints in these plans are not a requirement to scaffold them all. Keep collection useful with zero anomalies and provide a deterministic, rule-driven SIMULATION demonstration without hardcoded findings.
+- Never activate a public-dataset model for LIVE solely because feature names match. Require compatible measurement semantics and live validation. Preserve capability, feature, preprocessing, model and rule versions.
 
 ## Completion reporting
 
