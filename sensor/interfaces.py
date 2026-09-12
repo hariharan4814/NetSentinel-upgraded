@@ -5,6 +5,10 @@ import socket
 import psutil
 
 
+class InterfaceUnavailable(ValueError):
+    """Known missing/down interface, distinct from malformed runtime data."""
+
+
 @dataclass(frozen=True, slots=True)
 class Interface:
     name: str
@@ -31,6 +35,6 @@ def select_interface(name: str) -> Interface:
     for interface in list_interfaces():
         if interface.name == name:
             if not interface.is_up:
-                raise ValueError(f"Interface {name!r} is down/disconnected")
+                raise InterfaceUnavailable(f"Interface {name!r} is down/disconnected")
             return interface
-    raise ValueError(f"Interface {name!r} is unavailable; run interfaces")
+    raise InterfaceUnavailable(f"Interface {name!r} is unavailable; run interfaces")

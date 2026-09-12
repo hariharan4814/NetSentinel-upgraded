@@ -26,6 +26,8 @@ def main(argv=None):
     capture = sub.add_parser("capture", help="bounded metadata-only capture on one selected interface")
     capture.add_argument("--interface", required=True)
     capture.add_argument("--duration", type=float, default=10)
+    capture.add_argument("--recovery-retry-seconds", type=float, default=2)
+    capture.add_argument("--recovery-timeout-seconds", type=float, default=30)
     args = parser.parse_args(argv)
     try:
         if args.command == "interfaces":
@@ -37,8 +39,10 @@ def main(argv=None):
                 emit(interface)
             return 0
         if args.command == "capture":
-            run_capture(args.interface, args.duration, emit)
-            return 0
+            reason = run_capture(args.interface, args.duration, emit,
+                                 recovery_retry_seconds=args.recovery_retry_seconds,
+                                 recovery_timeout_seconds=args.recovery_timeout_seconds)
+            return 2 if reason == "interface_unavailable" else 0
         if args.samples < 0:
             raise ValueError("samples must be nonnegative")
         selected = select_interface(args.interface)

@@ -22,6 +22,7 @@ class MetadataQueue:
         self._items = deque(maxlen=capacity)
         self._lock = Lock()
         self.dropped = 0
+        self.high_water = 0
 
     def put(self, packet: PacketMetadata):
         if not isinstance(packet, PacketMetadata):
@@ -30,6 +31,7 @@ class MetadataQueue:
             if len(self._items) == self._items.maxlen:
                 self.dropped += 1
             self._items.append(packet)
+            self.high_water = max(self.high_water, len(self._items))
 
     def pop(self):
         with self._lock:
@@ -118,6 +120,7 @@ class WindowAggregator:
         start = floor(packet.timestamp / 10) * 10
         if packet.timestamp < self.started or start < self.next_start:
             self.late += 1
+            self.mark_loss()
             return False
         window = self._window(start)
         key = flow_key(packet)

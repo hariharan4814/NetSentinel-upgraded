@@ -4,6 +4,7 @@ Run from repository root using .venv Python and --interface <actual alias>.
 Outputs only controlled flow summaries, operational counts and socket metadata.
 """
 import argparse
+from contextlib import nullcontext
 import json
 from pathlib import Path
 import socket
@@ -18,6 +19,8 @@ from sensor.capture import run_capture, local_addresses
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--interface", required=True)
+    parser.add_argument("--http-outage", action="store_true",
+                        help="mirror health to an unavailable loopback HTTP sink; send controlled traffic after failure")
     args = parser.parse_args()
     local = next((a for a in local_addresses(args.interface) if ":" not in a), None)
     if local is None:
@@ -61,6 +64,10 @@ def main():
     def emit(record):
         if record["type"] == "capture_started":
             records.append(record)
+            if not args.http_outage:
+                ready.set()
+        elif record["type"] == "http_outage":
+            records.append(record)
             ready.set()
         elif record["type"] == "window":
             totals["windows"] += 1
@@ -79,18 +86,32 @@ def main():
                             "total_window_packets": sum(f["packets"] for f in record["flows"])})
         else:
             records.append(record)
+        if args.http_outage:
+            # Visible local delivery during the outage, before the optional POST.
+            # Keep stdout as the final JSON artifact and omit endpoint inventories.
+            visible = {k: record[k] for k in (
+                "type", "mode", "session_id", "observed_at", "capture_state", "valid",
+                "upload_bytes_per_second", "download_bytes_per_second", "features",
+                "partial", "reason", "exception_type", "attempts", "circuit_open",
+                "normalized", "shutdown_seconds") if k in record}
+            print(json.dumps(visible), file=sys.stderr, flush=True)
 
     worker = threading.Thread(target=traffic, daemon=True)
     worker.start()
     started = time.monotonic()
-    run_capture(args.interface, 24, emit)
+    from http_outage import OutageMirror, unavailable_endpoint
+    mirror = None
+    with unavailable_endpoint() if args.http_outage else nullcontext() as port:
+        mirror = OutageMirror(emit, port) if args.http_outage else None
+        run_capture(args.interface, 24, mirror if mirror is not None else emit)
     worker.join(timeout=1)
     flows = [flow for record in records if record["type"] == "window" for flow in record["flows"]]
     verified = all(any(f["protocol"] == protocol and f["outbound_packets"] > 0 and
                        f["inbound_packets"] > 0 for f in flows) for protocol in ("TCP", "UDP"))
     verified &= results.get("tcp_response_received", False) and results.get("dns_reply_valid", False)
     stopped = records[-1]
-    verified &= (totals["packets"] == stopped["normalized"] and not stopped["queue_dropped"]
+    verified &= (not stopped.get("interface_losses", 0) and stopped["reason"] == "duration"
+                 and totals["packets"] == stopped["normalized"] and not stopped["queue_dropped"]
                  and not stopped["parse_errors"] and not stopped["late"]
                  and not stopped["flow_overflow"] and not stopped["shutdown_error"])
     udp = [f for f in flows if f["protocol"] == "UDP"]
@@ -98,9 +119,23 @@ def main():
                  sum(f["inbound_packets"] for f in udp) == 1 and
                  sum(f["outbound_bytes"] for f in udp) == results.get("dns_request_bytes", 0) + 28 and
                  sum(f["inbound_bytes"] for f in udp) == results.get("dns_response_bytes", 0) + 28)
+    outage = None
+    if mirror is not None:
+        failures = [r for r in records if r["type"] == "http_outage"]
+        health = [r for r in records if r["type"] == "health"]
+        outage_passed = (len(failures) == 1 and mirror.attempts == 1 and mirror.accepted == 0
+                         and mirror.discarded == len(health) and len(health) >= 20
+                         and all(r["valid"] for r in health)
+                         and stopped["normalized"] > failures[0]["normalized_at_failure"]
+                         and not stopped["flow_errors"] and not stopped["queue_remaining"]
+                         and stopped["shutdown_seconds"] <= 5)
+        outage = {**mirror.summary(), "health_records": len(health),
+                  "passed": bool(verified and outage_passed)}
+        verified &= outage_passed
     print(json.dumps({"duration_wall_seconds": time.monotonic() - started,
                       "controlled_both_directions_verified": verified, "traffic": results,
-                      "all_flow_totals": totals, "records": records}, indent=2))
+                      "all_flow_totals": totals, "http_outage": outage,
+                      "records": records}, indent=2))
     return 0 if verified else 2
 
 

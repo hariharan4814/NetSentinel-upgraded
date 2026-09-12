@@ -12,10 +12,12 @@ from scapy.layers.inet6 import IPv6ExtHdrFragment, IPv6ExtHdrHopByHop
 from sensor.capture import check_driver_access, run_capture, resolve_capture_interface, stop_sniffer, window_record
 from sensor.flows import WindowAggregator
 from sensor.normalize import packet_to_metadata
+from sensor.counters import Counters
 
 
 def decoded(packet, timestamp=1):
-    result = Ether(bytes(Ether()/packet))
+    # Explicit synthetic L2 endpoints prevent Scapy's implicit ARP/route lookup.
+    result = Ether(bytes(Ether(src="02:00:00:00:00:01", dst="02:00:00:00:00:02")/packet))
     result.time = timestamp
     return result
 
@@ -26,6 +28,11 @@ def tcp(timestamp=1):
 
 
 class ConversionTests(unittest.TestCase):
+    def test_fixture_serialization_never_resolves_mac_addresses(self):
+        with patch("scapy.layers.l2.getmacbyip", side_effect=AssertionError("network resolution forbidden")) as lookup:
+            self.assertEqual(tcp()[Ether].dst, "02:00:00:00:00:02")
+            lookup.assert_not_called()
+
     def test_ipv4_tcp(self):
         metadata = packet_to_metadata(tcp(), "fixture", {"192.0.2.1"})
         self.assertEqual((metadata.source_ip, metadata.destination_ip), ("192.0.2.1", "198.51.100.2"))
@@ -159,6 +166,7 @@ class LifecycleTests(unittest.TestCase):
             "sensor.capture.resolve_capture_interface", return_value=(None, device, {"192.0.2.1"})
         ), patch("scapy.all.AsyncSniffer", side_effect=factory), patch(
             "sensor.capture.time.sleep", side_effect=KeyboardInterrupt if interrupt else None
+        ), patch("sensor.capture.read_counters", return_value=Counters(0, 0, 0, 0)
         ):
             if denied:
                 with self.assertRaisesRegex(RuntimeError, "permissions") as exc:

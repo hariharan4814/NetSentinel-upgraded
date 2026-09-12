@@ -2,6 +2,7 @@
 from dataclasses import asdict, dataclass
 import math
 import psutil
+from .interfaces import InterfaceUnavailable
 
 
 @dataclass(frozen=True, slots=True)
@@ -15,7 +16,7 @@ class Counters:
 def read_counters(interface: str) -> Counters:
     raw = psutil.net_io_counters(pernic=True, nowrap=False).get(interface)
     if raw is None:
-        raise ValueError(f"OS counters unavailable for {interface!r}")
+        raise InterfaceUnavailable(f"OS counters unavailable for {interface!r}")
     return Counters(raw.bytes_sent, raw.bytes_recv, raw.packets_sent, raw.packets_recv)
 
 

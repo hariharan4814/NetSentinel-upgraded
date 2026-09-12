@@ -1,4 +1,36 @@
-# Sprint 0 architecture and feasibility review
+# Architecture review and scope decision
+
+## Reduced final-project review — 2026-09-11
+
+**Accepted scope:** NetSentinel: An Intelligent Real-Time Network Monitoring and Anomaly Detection System. Preserve all existing Sprint 1 code, dependencies, tests and evidence. Sprint 0 is complete; Sprint 1 implementation is almost complete, but its formal result remains **PARTIALLY PASSED / NO-GO for Sprint 2**. This review changes documentation only and authorizes no web/database/ML setup.
+
+The four final modules are **Live Network Monitor**, **Anomaly Detection Engine**, **Explainable Threat Analysis**, and **Network Recovery & Demo Lab**. Their scientific claims are limited to actual observations and compatible features: unusual does not imply malicious, Normal does not imply safe, and unscored/missing data does not become Normal or zero.
+
+| Prior planning item | Current decision |
+| --- | --- |
+| Administrator/analyst/viewer product, JWT/ticket orchestration | Advanced RBAC OUT OF SCOPE; use minimal local operator authentication and scoped ingestion with server-side checks. |
+| Incidents, risk/asset weights, case transitions/notes, alerts and notifications | OUT OF SCOPE; retain computed feature/rule explanations and evidence, without a response workflow. |
+| Broad devices/inventory, discovery, topology/React Flow and remote-device models/claims | OUT OF SCOPE; selected-interface metadata and flow endpoints only. Preserve historical visibility limitations/negative evidence. |
+| Bluetooth, threat intelligence APIs, AI chatbot/LLM explanations | OUT OF SCOPE; explanations are local and based on observed statistics. |
+| Celery, automatic remote jobs/capture controls, microservices/cloud requirements | OUT OF SCOPE; local CLI operations and modular Django. Redis only after a documented essential need; REST polling first. |
+| Multi-model comparisons and enterprise report/export systems | OUT OF SCOPE; one Isolation Forest with valid evaluation, recent charts and academic report support. |
+| A1/A2/X expansion and former Sprint 7 | Removed from active roadmap. Seven sprints 0–6; final integration/submission is Sprint 6. Compatible replay is staged within the lab and can follow later. |
+| Risk-55/one-incident simulation fixture | Superseded by two computed window rule findings and zero benign-control findings; ML can be disabled. No hardcoded results. |
+| Seven frozen host-v1 features and S1-01–S1-08 | Unchanged. Port/flow counts for explanations come from retained metadata, not silent model-vector expansion. |
+
+Revised roadmap: 0 planning (complete); 1 real sensor/stability/recovery (almost complete, acceptance partial); 2 Django REST/PostgreSQL; 3 Next.js monitor; 4 genuine baseline/Isolation Forest; 5 feature explanations and labelled Simulation/Replay; 6 integration, evaluation, polish, documentation and viva.
+
+Reasons/consequences/status are recorded in ARCHITECTURE.md ADR-019/020. Product/API/database/module/design/testing plans now describe only necessary core support. SECURITY_RULES.md is also aligned because its former mandatory roles/JWT/socket design contradicted the reduced API plan; basic access control, CSRF, credential separation and privacy remain mandatory.
+
+Remaining evidence: unexplained USB process termination after two observed recoveries; no accepted uninterrupted 1,800-second run; matched live TCP reference, sustained resource/latency/full stop measurements, fresh live repeat and unavailable-HTTP-sink integration remain open. The latter is not proved by an injected preflight exception. Current adapter availability is unknown in this cleanup; older absent-adapter claims are historical.
+
+Validation: the full existing sensor suite passed **86/86 in 2.657 seconds**, exit 0. SHA-256 comparison confirms existing non-document files, including sensor/tests/dependencies, are unchanged from the starting working tree. All eight gate rows and the frozen live contract are unchanged; historical evidence is preserved. All 46 local Markdown links resolve. `git diff --check` passed, exit 0, with LF/CRLF notices only. No new hardware/capture, model accuracy or backend capability is claimed.
+
+## Historical Sprint 0 review — preserved evidence, superseded scope
+
+The complete 2026-09-08 review below is retained as history. Its enterprise/advanced/experimental delivery tiers, incident/risk fixture, six-app proposal and Sprint 7/A1/A2/X recommendations are **OUT OF SCOPE or superseded** by the decision above. Statements about absent implementation/tests/hardware describe that review date only. Its scientific, privacy, independent-sensor and Sprint 1 feasibility reasoning remains useful; historical recommendations are not active authorization.
+
+# Historical Sprint 0 architecture and feasibility review
 
 Review date: 2026-09-08. Scope: all 14 original Sprint 0 files together. Result: documentation corrected; implementation remains conditional on the standalone Windows feasibility gate. No hardware capture, model evaluation, dependency installation or application tests were performed in this review.
 

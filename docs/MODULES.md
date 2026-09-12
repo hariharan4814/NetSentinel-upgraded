@@ -1,37 +1,28 @@
 # Module responsibilities
 
-Modules are domain boundaries, not 23 services or immediately scaffolded apps. Start with at most six cohesive Django apps as sprints need them: accounts (roles, audit and validated settings submodules), monitoring (sensors, interfaces, host/peer inventory and health), telemetry (samples, flow/features, short history/export), detection_registry (model manifests/assignments), incidents (risk orchestration, workflow/alerts), and labs (run manifests/read views). Sensor and detection are independent Python packages. Split these apps later only for a measured maintenance need; do not build a generic configuration framework first.
+Reduced scope accepted 2026-09-11: exactly four product modules. These are cohesive responsibilities, not four microservices or instructions to scaffold everything. Existing sensor code and tests remain the Sprint 1 foundation.
 
-The tier definitions in PRODUCT_REQUIREMENTS.md control delivery. This table describes ownership, not authorization to build all features.
-
-| Module | Owner/boundary | Responsibility and dependency |
+| Core module | Ownership | Responsibility and dependency |
 | --- | --- | --- |
-| Authentication and RBAC | accounts app | Users, roles, JWT lifecycle; permission checks shared across API/socket access |
-| Dashboard | frontend feature | Compose read models; no security inference in UI |
-| Network Interfaces | monitoring app + sensor | MVP: one proven interface with actual counters, capabilities and capture state |
-| Real-Time Network Sensor | sensor package | Capture lifecycle, heartbeat, bounded transport and local permissions |
-| Device Discovery and Inventory | monitoring inventory submodule + sensor | MVP local host/observed peers; active discovery and per-client attribution experimental |
-| Traffic and Flow Monitoring | telemetry app + sensor aggregation | MVP: one-second samples and 10-second flow segments; early retention/budget enforcement |
-| Feature Engineering | detection package | MVP host v1 sufficient statistics; remote-device/dataset-transfer schemas experimental |
-| ML Model Management | detection_registry app + offline training | Evaluation metadata, trusted artifacts, approval, activation and rollback |
-| Anomaly Detection | detection package | Compatible model inference and threshold decisions |
-| Threat Analysis | detection rules package | MVP bounded local fan-out rule; backend-history rules advanced; no ML attack classification |
-| Risk Scoring | pure policy functions + incidents app | Versioned device/incident prioritization, component explanations |
-| Incident Management | incidents app | Correlation, status transitions, investigation notes and evidence |
-| Alerts | incidents app | In-app notifications, cooldowns and delivery/read state |
-| Network Health | monitoring app | MVP sensor/link state and gaps; approved reachability probes advanced; no general security verdict |
-| Network Topology | monitoring read models + frontend | Advanced observed communication graph; React Flow adoption deferred with feature |
-| Analytics | telemetry read services | MVP short history; rich summaries/trends advanced |
-| Simulation Lab | labs app + synthetic source | MVP local launcher, run selector and deterministic rule incident; UI job launching advanced |
-| Replay Lab | labs app + replay source | Advanced PCAP decoding and virtual time; incompatible public CSVs are offline research |
-| Reports | telemetry export services | MVP bounded CSV; async/rich reports advanced |
-| Audit Logs | accounts audit submodule | MVP append-only application events for sensitive changes |
-| Settings | accounts settings submodule | MVP fixed validated policy fields; no generic settings engine |
-| Bluetooth Context | optional adapter, later | Presence/context only, distinct from IP identity and traffic |
-| AI Assistant | optional integration, later | Evidence-linked explanations; no authority to classify or execute actions |
+| Live Network Monitor | Existing sensor package; future monitoring and telemetry Django apps; Next.js monitor view | Native Windows Npcap/Scapy capture, real one-second counters, packet/protocol/flow aggregation in ten-second windows, interface/sensor status and bounded recent persistence. |
+| Anomaly Detection Engine | Reusable detection Python package and offline CLI; small future detection Django app for manifests/results | Genuine baseline, frozen host-v1 inputs, one Isolation Forest, trusted save/load and calibrated Normal / Anomalous output. No ORM or UI dependency in extraction/inference. |
+| Explainable Threat Analysis | Pure explanation/rule functions within detection; dashboard finding detail | Compute deviations and bounded rule evidence from observed features/statistics. Store reference values and versions; no LLM, attack certainty, incident lifecycle or weighted risk engine. |
+| Network Recovery & Demo Lab | Existing capture supervisor/diagnostic helpers; later isolated simulation/replay sources; monitoring/telemetry read views | Interface loss and explicit gaps, bounded same-identity recovery, new sessions, deterministic labelled demo inputs and compatible replay. No network reconfiguration or synthetic LIVE fallback. |
+
+## Supporting architecture
+
+Start Sprint 2 with only monitoring (source/interface/session/status) and telemetry (samples/flow summaries/ingestion/retention) as cohesive Django apps. Use Django's built-in authentication facilities for a minimal local operator and a scoped machine upload credential as needed; no custom accounts/RBAC framework. Add detection only in Sprint 4 for small model/feature/result records. Lab manifests can live with source sessions; no separate labs app or task service is required.
+
+The Next.js dashboard arrives in Sprint 3. It presents accepted data and explanatory evidence; it neither captures packets nor makes security decisions. Backend authentication, migrations, retention and minimal operational logging are supporting controls, not additional product modules.
 
 ## Dependency discipline
 
-Ingestion may call monitoring/inventory and incident services within a transaction. Inventory must not import frontend/capture modules. Detection accepts typed metadata/features and locally available bounded context, returning structured findings without ORM/HTTP dependencies. The sensor runs even when detection or HTTP output is unavailable. Simulation and compatible PCAP replay implement the same normalized source contract; neither writes directly into incident tables/dashboard stores. Existing public feature CSVs cannot pretend to implement a packet source.
+Keep capture outside Django request processing. Sensor startup, aggregation and local output require no web framework, database, model or backend connection. An optional bounded HTTP sink cannot stall collection; analysis rejection cannot discard valid telemetry.
 
-Shared code should be limited to versioned contracts, identifiers, clocks, and small reusable utilities. Avoid a catch-all app or utilities file. Frontend feature boundaries mirror user workflows rather than every database table. Audit recording is invoked by domain services and must not create circular business dependencies.
+Detection accepts typed versioned features, permitted metadata and bounded local context, returning structured results without ORM/HTTP dependencies. Offline training is explicitly invoked. Keep shared code limited to contracts, IDs, clocks and small utilities. Feature/observation/preprocessing/model/rule versions must survive persistence and presentation.
+
+SIMULATION and compatible REPLAY use the shared normalized metadata/aggregation path with isolated mode/run/session and rolling state. Neither writes precomputed findings into the dashboard/database. Public feature tables with different semantics do not implement a packet source. Gap, unknown and partial data never become valid idle values.
+
+## Historical boundaries — OUT OF SCOPE
+
+The former six-app proposal (accounts, monitoring, telemetry, detection_registry, incidents, labs) is superseded; it was never an implemented backend. Do not scaffold incident/alert/risk services, enterprise accounts, broad device inventory, topology, rich reporting, Bluetooth, AI/LLM or intelligence adapters. Advanced RBAC, remote controls/jobs, notifications, multi-model comparisons, microservices and cloud delivery are excluded by [PRODUCT_REQUIREMENTS.md](PRODUCT_REQUIREMENTS.md). Redis is reserved only for a later demonstrated necessity; Celery is excluded. Historical review evidence remains in [ARCHITECTURE_REVIEW.md](ARCHITECTURE_REVIEW.md).

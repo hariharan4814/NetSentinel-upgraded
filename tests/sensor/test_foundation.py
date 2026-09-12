@@ -85,7 +85,7 @@ class FoundationTests(unittest.TestCase):
         self.assertEqual(new.start, 10)
         idle, = agg.advance(32)
         self.assertEqual(idle.flows, {})
-        self.assertFalse(idle.partial)
+        self.assertTrue(idle.partial)  # Known late loss invalidates remaining session.
 
     def test_flow_capacity_preserves_existing_key(self):
         agg = aggregator(max_flows=1)

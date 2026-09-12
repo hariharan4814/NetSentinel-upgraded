@@ -1,26 +1,39 @@
 # Sequential roadmap
 
-Sprint lengths are estimates of 1–2 weeks, adjusted to the academic deadline. Proceed by evidence, not calendar alone. MVP completion and evaluation take precedence over advanced modules. Implementation requires a subsequent user instruction; this review does not authorize starting Sprint 1.
+Reduced scope accepted 2026-09-11: seven sprints numbered **0–6**. Sprint 0 is
+complete; **Sprint 1 PASS for Ethernet 3 own-host scope, 2026-09-12**. Later
+implementation requires explicit authorization and the preceding gates; this
+sign-off does not start Django, Next.js, PostgreSQL or ML work.
 
 | Sprint | Deliverables | Exit gate and dependencies |
 | --- | --- | --- |
-| 0 — Foundation | This documentation, agent rules, ignore policy | All requested documents agree; no application code or scaffolds |
-| 1 — Standalone Windows feasibility | Minimal local sensor spike, one-second real counter output, 10-second packet windows, visibility evidence | All S1-01 through S1-08 below; no web framework, database, ML training or advanced feature work |
-| 2 — Access and live vertical slice | Authorized Next.js/Django/PostgreSQL setup; roles/JWT; one ASGI process; sensor enrollment; telemetry ingestion; minimal live screen; retention | Real data updates with zero models/anomalies; counter and packet sources labelled; reconnect/stale states, idempotency, access control and initial disk cleanup verified |
-| 3 — Shared features and deterministic inputs | Fixed host feature schema, local/observed endpoint inventory, seeded simulation CLI, Lab read view, reviewed normal collection | Hand-calculated feature fixtures pass; LIVE/SIMULATION state isolation; enough separately recorded sessions to plan research split |
-| 4 — Research baseline and detection | Offline training/calibration registry, sensor inference, manual activation/rollback, versioned rules and priority | Model/feature parity, locked split/threshold, no attack labels, no-model and partial-data handling; model mismatch cannot stop telemetry |
-| 5 — Investigation and reliable demonstration | Incidents, cooldown/dedup, notes, role-safe transitions, audit and in-app alerts | Defined simulation produces one rule-driven incident with ML disabled; benign control produces none; live no-anomaly workflow stays useful |
-| 6 — MVP usability and operations | Short history, bounded CSV report, settings, accessible dashboard, Windows startup procedure, backup/restore | Freshness/gaps and modes in UI/exports; query/resource targets measured; retention and restore exercised |
-| 7 — Evaluation and final submission | Frozen test evaluation, resilience/security checks, dissertation limitations and rehearsed demonstration | Separate live/labelled/synthetic claims; measured resources, false-alert burden and latency; all MVP gates complete before advanced work |
-| A1 — Advanced (schedule permitting) | Observed topology, richer analytics/reporting, optional local runner for UI lab controls and capture requests | Explicit runner lifecycle and permissions; no unsupported topology claims; cannot delay Sprint 7 |
-| A2 — Advanced Replay Lab | Bounded PCAP decoding, shared metadata pipeline, virtual time | Feature parity and label-mapping evidence; parser/privacy limits; incompatible public CSVs remain offline research |
-| X — Optional/experimental | Hotspot attribution, monitor mode, remote-device models, Bluetooth, AI, external intelligence, supervised comparison | Independent hardware/compatibility/privacy gates; none is required to pass the MVP |
+| 0 — Planning and architecture | Project requirements, boundaries, scientific/privacy principles and acceptance plan | Complete; later scope decisions update this baseline without rebuilding the sensor. |
+| 1 — Real Windows sensor | Existing Npcap/Scapy capture, one-second telemetry, ten-second flows/features, stability, gaps and safe recovery | PASS on Ethernet 3; all S1-01 through S1-08 evidenced in the final feasibility report. No shortened/gapped diagnostic counts as uninterrupted acceptance. |
+| 2 — Django REST + PostgreSQL | Simple backend, telemetry/flow/interface/status APIs, bounded persistence, local source registration and minimal authentication | Requires full S1 PASS and explicit setup authorization. Genuine sensor records persist/read back with provenance, idempotency, authorization, migrations, gaps and retention; optional sink failure cannot stop local monitoring. No dashboard/ML prerequisite. |
+| 3 — Next.js dashboard | Current upload/download, packets, TCP/UDP, active flow summaries, interface/sensor status and traffic charts | Real accepted data updates with no model or anomalies; source/units/mode visible, stale/gap/reconnect/cache separation tested, display latency measured. Start with bounded REST polling. |
+| 4 — Isolation Forest anomaly detection | Confirm frozen host-v1, collect reviewed genuine baseline, train/calibrate one model, trusted save/load, score live ten-second windows | Feature/preprocessing parity, session-separated splits, locked threshold/test evaluation, actual model versions, Normal / Anomalous and score; incompatible/partial/no-model data stays unscored and telemetry continues. |
+| 5 — Explainable analysis + Simulation/Replay | Feature-based explanations, controlled anomaly scenarios, isolated modes, deterministic rule-driven viva demo; compatible replay source when supported | Explanations cite actual deviations/statistics and limitations; benign control and repeated SIMULATION compute expected rule findings with ML disabled. LIVE/SIMULATION/REPLAY separation tested. PCAP/controlled-data replay requires compatibility/privacy/parser gates; if not delivered, show unavailable and document limitation. |
+| 6 — Final integration and completion | End-to-end tests, UI polish, measured performance/stability, final research evaluation, documentation, screenshots, report support and viva rehearsal | Useful genuine live monitor, honest Normal / Anomalous evaluation, labelled safe demo, explicit gaps/visibility limits, local startup/restore and final evidence. No enterprise/cloud requirement. |
+
+## Removed roadmap tracks — OUT OF SCOPE
+
+The former Sprint 2 roles/JWT/frontend bundle, Sprint 3 inventory/lab bundle, Sprint 5 incident workflow, Sprint 6 reporting/admin scope, Sprint 7 submission slot and A1/A2/X expansion tracks are superseded. Final evaluation/submission is now Sprint 6. Compatible replay is staged in module 4/Sprint 5 and may be completed later; it is not an enterprise expansion track.
+
+Do not schedule advanced RBAC, complex incidents/risk/alerts, Bluetooth, topology, intelligence APIs, AI/LLM, Celery, enterprise notifications, remote-device traffic claims/models, multi-model research, enterprise reporting, broad inventory, unjustified microservices, required cloud deployment, browser capture/job controls or active discovery. Redis requires a separately documented essential need. Historical decisions and hardware experiments remain evidence only.
 
 ## Exact Sprint 1 objective
 
 Prove that an independently runnable, metadata-only Python sensor can produce visible, genuinely live interface counters and correct bounded packet/flow summaries from at least one intended non-loopback interface on the actual Windows student laptop, without Django, Next.js, PostgreSQL, Redis, Celery or an ML model. Establish the visibility boundary and freeze a small live-compatible feature contract before web development.
 
 ## Mandatory Sprint 1 success criteria
+
+Sign-off, 2026-09-12: **Sprint 1 PASS for the selected Ethernet 3 host profile**.
+Accepted uninterrupted thirty-minute run, exact matched TCP reference, fresh
+TCP/UDP/windows/features, idle/memory review and real unavailable-HTTP-sink
+independence are recorded in the latest feasibility report. All 93 tests pass.
+Historical termination cause remains unproven; recovery evidence and current
+clean completion are separately documented. All eight gate rows and numerical
+tolerances below are unchanged. Sprint 2 requires explicit authorization.
 
 All eight criteria require recorded evidence; a proposal or source citation is not hardware validation. Store evidence in [SPRINT1_FEASIBILITY_REPORT.md](SPRINT1_FEASIBILITY_REPORT.md) with sanitized observations and commands/configuration, never private captures. Phases 1A/1B are authorized and recorded there. Phase 1B demonstrates real bidirectional TCP/UDP and flow aggregation on Ethernet 3; it does not complete all eight gates. The remaining sprints are not authorized by this implementation.
 
@@ -37,8 +50,8 @@ All eight criteria require recorded evidence; a proposal or source citation is n
 
 ## Demonstration and contingency
 
-Core sequence: sign in → show LIVE interface/source/capabilities → generate benign own-laptop traffic → show real rates/flows even with zero anomalies → explicitly select SIMULATION → locally launch the fixed demo run → show measured rule evidence and the resulting incident → acknowledge/investigate/resolve → export a mode-labelled report. Starting a Lab from the browser is advanced; a documented local launcher plus visible Lab results is sufficient for MVP.
+Show selected LIVE interface/source/capabilities, generate benign authorized own-laptop traffic and show real rates/protocols/flows even with zero anomalies. Where a compatible model is available, show Normal / Anomalous, score/threshold and evaluated-window coverage. Explicitly select SIMULATION, run the local deterministic scenario and explain computed feature/rule evidence. No incident acknowledgment/resolution/export workflow is required.
 
-The deterministic path is specified in ML_METHODOLOGY.md: benign control followed by synthetic fan-out windows, evaluated by a fixed transparent rule with an explicit incident policy. It must produce an incident even with ML disabled, because actual generated metadata satisfies the rule. Scores/labels/incidents are never preinserted. Keep the fixture distinct from held-out scientific evaluation; this is an integration demonstration, not evidence of attack accuracy.
+The ML_METHODOLOGY.md demonstration uses a benign control and generated fan-out metadata with a fixed transparent rule. Findings are computed, never inserted as expected dashboard rows; ML can be disabled. A scenario pass is integration evidence, not attack-detection accuracy. REPLAY must select a supported input/profile and preserve original event time; unavailable replay stays visibly unavailable.
 
-If live capture fails during presentation, disclose the failure, retain real OS counters if available and use the visibly separate Simulation Lab. This fallback does not retroactively satisfy Sprint 1. Defer A1, A2 and X when time contracts; preserve real telemetry, research evaluation and reliable incident demonstration. Remaining timing estimates must be reconciled with the actual submission date before implementation commitments.
+If capture fails during the viva, disclose the failure and monitoring gap. Retain genuine OS counters only if available, and switch explicitly to a labelled lab. Recovery or simulation cannot retroactively pass Sprint 1. Keep gaps, private metadata handling, source limitations and honest research results in the final report.
