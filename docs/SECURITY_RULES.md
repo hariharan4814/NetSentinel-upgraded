@@ -1,5 +1,19 @@
 # Security rules
 
+## Initial Sprint 2 exception - 2026-09-13
+
+The current user task explicitly defers authentication. This supersedes the
+auth/enrollment requirements below for the initial four-model local API only.
+No accounts, sessions, tokens or login endpoints are scaffolded. The runtime
+requires environment-based secrets/PostgreSQL credentials, permits loopback
+peers and fixed localhost Host values only, rejects Origin/cross-site browser
+requests, and does not trust forwarded client IPs. No CORS or deployment is
+provided. Local processes are unauthenticated and can access the data; loopback
+checks are not identity authorization. Future exposure requires a new security
+decision and authentication. Unknown request fields/payload blobs are rejected;
+typed metadata is bounded and database errors are redacted. See ADR-023 and
+[BACKEND_SETUP.md](BACKEND_SETUP.md).
+
 Scope alignment, 2026-09-11: retain capture authorization, metadata privacy, provenance, trusted models and bounded processing for the four core modules. Replace the former mandatory enterprise roles/JWT/ticket design with minimal local access. This supporting update prevents a conflicting security plan from recreating removed features; it changes no code or Sprint 1 acceptance rule.
 
 ## Trust boundaries and threats

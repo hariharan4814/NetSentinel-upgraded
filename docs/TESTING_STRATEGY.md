@@ -1,5 +1,38 @@
 # Testing strategy
 
+## Final Sprint 2 sign-off - 2026-09-13
+
+**PASS for the agreed backend scope.** [Final acceptance report](SPRINT2_ACCEPTANCE.md)
+records operator-verified PostgreSQL 17 migrations/API persistence, the new
+31/31 backend and 93/93 sensor test results, normal-settings Django and migration
+checks, and explicit deferred feature/auth/concurrency limitations. The earlier
+setup-pending statements below describe historical checks.
+
+## Initial Sprint 2 backend verification - 2026-09-13
+
+The continuation preserved the existing backend and its three generated migrations.
+The backend suite passes **31/31 tests in 1.201 seconds**, exit 0, using
+`.\.venv-backend\Scripts\python.exe backend/manage.py test backend/tests --settings=config.test_settings -v 1`.
+Tests apply the real migrations to in-memory SQLite and cover ingestion validation,
+identity conflicts, retry idempotency, provenance, null/reason preservation,
+timezone handling, aggregate-only fields, bounded recent queries, pruning,
+database failures, the local API boundary and runtime configuration.
+Added regressions reject rebinding a run to a different observation context and
+reject using SQLite test settings for runtime commands.
+
+The unchanged sensor suite passes **93/93 tests in 5.492 seconds**, exit 0, using
+`.\.venv\Scripts\python.exe -m unittest discover -s tests/sensor -v`.
+Sensor source, tests and dependency manifest have no diff against `ea8819a`.
+Django `check` reports no issues; `makemigrations --check --dry-run` reports no
+changes, both with `--settings=config.test_settings`. Backend `pip check` passes.
+`git diff --check` passes. No live sensor run or PostgreSQL service was started.
+
+PostgreSQL migration application, concurrent ingestion (including the PostgreSQL
+transaction advisory lock) and real persistence remain integration checks after
+manual installation. SQLite results do not certify those PostgreSQL behaviours.
+See [backend setup](BACKEND_SETUP.md) for exact commands. This verifies the initial
+Sprint 2 code scope, not deployment readiness or completion of broader roadmap gates.
+
 ## Final Sprint 1 acceptance - 2026-09-12
 
 **93/93 tests passed in 4.295 seconds**, exit 0, with

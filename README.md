@@ -4,7 +4,7 @@
 
 An M.Sc. final-year project for genuine network monitoring on a Windows laptop, Isolation Forest anomaly detection, observed-feature explanations and a safe, clearly labelled demonstration lab.
 
-**Status:** Sprint 0 complete. **Sprint 1 PASS on Ethernet 3, 2026-09-12.** Real Npcap/Scapy TCP/UDP capture, aggregation, seven-feature generation, recovery and process diagnostics are demonstrated within the recorded host-profile limits; **93/93 tests pass**. No backend, dashboard or trained model is implemented. Sprint 2 requires a separate explicit implementation request.
+**Status:** Sprint 0 complete. **Sprint 1 PASS on Ethernet 3, 2026-09-12**, committed at `ea8819a`. The proven sensor and its 93 tests remain unchanged. **Sprint 2 PASS for the agreed local backend scope**, with operator-verified PostgreSQL 17 persistence. See [Sprint 2 evidence and limitations](docs/SPRINT2_ACCEPTANCE.md). No frontend, ML or authentication is implemented in this user-authorized slice.
 
 The corrected scheduler passed the uninterrupted thirty-minute run with 1,799 valid samples, all checks true and exit 0. Matched TCP reference discrepancy is 0%; fresh-process TCP/UDP, windows/features, idle/memory review and actual HTTP-outage independence pass. Recovery cleanup evidence is sufficient for this scope; the historical abrupt exit's cause remains unproven. [Final acceptance matrix and evidence](docs/SPRINT1_FEASIBILITY_REPORT.md) supersede older partial-status statements.
 
@@ -60,6 +60,13 @@ Keep the existing Python 3.11 sensor with pinned Scapy/psutil and manually insta
 - [Sprint 1 evidence, blockers and next command](docs/SPRINT1_FEASIBILITY_REPORT.md)
 
 ## Standalone sensor (PowerShell, Python 3.11)
+
+For the backend, use the separate `.venv-backend` environment and follow
+[Windows PostgreSQL/backend setup](docs/BACKEND_SETUP.md). The
+[API contract](docs/API_PLAN.md) covers the four models, seven operations,
+validation, idempotency and the temporary local-only/no-auth boundary.
+The sensor still starts independently using the commands below; no uploader
+or Django import was added to it.
 
 ```powershell
 py -3.11 -m venv .venv

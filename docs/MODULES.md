@@ -1,5 +1,12 @@
 # Module responsibilities
 
+Initial Sprint 2 implementation, 2026-09-13: the monitoring app owns sessions and
+status; telemetry owns aggregate samples/windows, ingestion and explicit pruning.
+These are the only Django domain apps. The user's current task defers all
+authentication and extra source/interface/receipt models in the earlier plan.
+The sensor package and all Sprint 1 tests remain independent and unchanged.
+See [API_PLAN.md](API_PLAN.md) and ADR-023 for the implemented boundary.
+
 Reduced scope accepted 2026-09-11: exactly four product modules. These are cohesive responsibilities, not four microservices or instructions to scaffold everything. Existing sensor code and tests remain the Sprint 1 foundation.
 
 | Core module | Ownership | Responsibility and dependency |

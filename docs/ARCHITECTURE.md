@@ -1,5 +1,14 @@
 # Architecture
 
+Initial Sprint 2 backend implemented, 2026-09-13: monitoring and telemetry Django
+apps, DRF, environment-based PostgreSQL configuration and exactly four models.
+SQLite is restricted to automated test/check tooling. Sprint 2 is PASS for the
+agreed scope with operator-verified PostgreSQL 17 migrations and API persistence;
+see [acceptance evidence and deferred integration](SPRINT2_ACCEPTANCE.md). This user-authorized slice explicitly
+defers authentication, frontend, ML and the sensor adapter; the API is loopback-only.
+The earlier broader Sprint 2/auth proposals below are superseded for this slice.
+See [API contract](API_PLAN.md) and [Windows setup](BACKEND_SETUP.md).
+
 Sprint 1 sign-off, 2026-09-12: **PASS for Ethernet 3 own-host scope**. The accepted
 thirty-minute run, fresh live repeats and test-only unavailable HTTP consumer
 close the evidence gates without changing production sensor code in this task.
@@ -74,6 +83,32 @@ uninterrupted stability and fresh clean exits support the scoped Sprint 1 PASS.
 See SPRINT1_FEASIBILITY_REPORT.md for the evidence and qualifications.
 
 ## Decision register
+
+ADR-023 - **Accepted for the initial Sprint 2 scope, 2026-09-13:** two Django
+apps with MonitoringSession, TelemetrySample, TrafficWindow and CaptureStatus
+only. Reason: implement the user's minimum persistence/API task without changing
+the proven sensor. Consequences: aggregate typed fields only, UUID identities,
+UTC event/receipt times, immutable session provenance, normalized content digests
+and unique keys for retry/conflict handling. PostgreSQL transaction advisory
+locks serialize registrations sharing a run ID, including first registration;
+source/mode/interface/profile must agree across recovered sessions. Actual
+PostgreSQL concurrency testing remains pending local installation.
+
+The user's explicit no-authentication instruction supersedes earlier required
+auth/enrollment work for this slice. Loopback peer and fixed Host checks reject
+remote requests; Origin/cross-site requests are rejected. This is not protection
+against another local process. No proxy/deployment or frontend is supported yet.
+The root .env supplies required runtime secrets/database settings; the independent
+.venv-backend pins Django 5.2/DRF/psycopg without touching sensor dependencies.
+No SQLite fallback at runtime. Test settings reject runtime commands.
+
+Only single-record ingestion and bounded recent reads are implemented. No packet
+payload, per-flow inventory, embedded features/models or ingestion-receipt table.
+Digests live on the four records; retries are idempotent while records are retained.
+Explicit pruning removes at most 1000 expired rows per telemetry/status table per
+invocation after 24 hours by receipt time, retaining session manifests. Automatic
+retention, global row/byte admission budgets and production sensor upload/spooling
+remain deferred; this does not claim the former larger storage/transport gate.
 
 ADR-022 - **Accepted for Sprint 1 evidence only, 2026-09-12:** attach a test-only
 optional HTTP health mirror at the existing sensor emission boundary. Reason:

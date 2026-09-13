@@ -1,5 +1,14 @@
 # Sequential roadmap
 
+Initial Sprint 2 slice, 2026-09-13: backend code is implemented for four models
+and seven REST operations, with PostgreSQL settings, migrations and automated
+SQLite tests. **PASS for the agreed local backend scope**, supported by operator
+PostgreSQL 17 verification and [final checks](SPRINT2_ACCEPTANCE.md). Full seven-feature
+persistence and PostgreSQL concurrency remain deferred/unverified. The user's current
+scope explicitly defers authentication, sensor uploading, broader retention
+budgets and the extra planned models. This supersedes those deliverables in the
+broader Sprint 2 row below for this task. No Sprint 3 or ML work is started.
+
 Reduced scope accepted 2026-09-11: seven sprints numbered **0–6**. Sprint 0 is
 complete; **Sprint 1 PASS for Ethernet 3 own-host scope, 2026-09-12**. Later
 implementation requires explicit authorization and the preceding gates; this

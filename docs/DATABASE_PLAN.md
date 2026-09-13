@@ -1,5 +1,34 @@
 # Database plan
 
+## Implemented initial Sprint 2 slice - 2026-09-13
+
+Exactly four models now exist: `monitoring.MonitoringSession` and
+`monitoring.CaptureStatus`; `telemetry.TelemetrySample` and
+`telemetry.TrafficWindow`. See [API_PLAN.md](API_PLAN.md) for fields and validation.
+The initial task defers Sensor, Interface, users, receipts and per-flow tables
+from the broader proposal below. Source UUID/interface/mode/run/profile live on
+the immutable session; child rows reference it. Typed samples retain cumulative
+OS counters, nullable deltas/rates, elapsed time, validity and reason. Windows
+retain aggregate directional/protocol counts, IP bytes, quality and timestamps;
+there is no packet payload, arbitrary JSON or feature/model blob.
+
+Three existing generated migrations are retained: monitoring/0001_initial,
+telemetry/0001_initial and telemetry/0002_trafficwindow_window_session_end_idx.
+They supply foreign keys, UUID/observation uniqueness, conservation/validity
+checks, and session/time indexes. Digests on retained rows implement idempotency;
+no extra receipt model is needed. Django's own migration bookkeeping is separate
+from the four application models. Runtime is PostgreSQL only; SQLite is confined
+to automated tests/checks. The operator verified all three migrations and API
+persistence on PostgreSQL 17; see [Sprint 2 acceptance](SPRINT2_ACCEPTANCE.md).
+Full seven-feature/context preservation and PostgreSQL concurrency are not certified.
+
+Recent queries are limited to one session/mode and 24 hours of observation time,
+with cursor pages at most 200 records. The explicit pruning command deletes at
+most 1000 rows per sample/window/status table older than 24 hours by receipt time;
+session manifests remain. These are the implemented bounds. The larger global
+row/byte admission, automatic cleanup and database throughput budgets below
+remain future proposals, not capabilities of this minimal backend.
+
 PostgreSQL is the planned system of record for a simple local backend, introduced only in an authorized Sprint 2 after Sprint 1 passes. This is a logical contract, not migrations. Use UUID identifiers, timezone-aware UTC, foreign keys, explicit checks and versioned migrations. One database suffices; no time-series extension, per-mode database, job queue or event-sourcing system.
 
 ## Staged minimum entities

@@ -1,0 +1,10 @@
+# Resolved and tested in the separate Python 3.11 Windows backend environment.
+Django==5.2.17
+djangorestframework==3.17.2
+psycopg==3.3.5
+psycopg-binary==3.3.5
+python-dotenv==1.2.3
+asgiref==3.12.1
+sqlparse==0.6.0
+typing_extensions==4.16.0
+tzdata==2026.4
