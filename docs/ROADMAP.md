@@ -1,5 +1,13 @@
 # Sequential roadmap
 
+Sprint 3 is now authorized and its Next.js/TypeScript dashboard is implemented.
+Status/gap and full session readback are now implemented and tested without
+schema changes. **PASS for the agreed dashboard scope**, with operator-verified
+PostgreSQL readback and outage/recovery; see [final acceptance](SPRINT3_ACCEPTANCE.md).
+Live dashboard latency and continuous ingestion are not certified. See [frontend evidence](FRONTEND_SETUP.md).
+This supersedes historical "Sprint 3 not started" statements below. Sprint 4,
+ML and changes to the proven sensor/frozen contract remain unauthorized.
+
 Initial Sprint 2 slice, 2026-09-13: backend code is implemented for four models
 and seven REST operations, with PostgreSQL settings, migrations and automated
 SQLite tests. **PASS for the agreed local backend scope**, supported by operator

@@ -1,5 +1,37 @@
 # API and event plan
 
+Sprint 3 is **PASS for the agreed local dashboard integration scope** with the
+GET contracts below unchanged. [Final evidence](SPRINT3_ACCEPTANCE.md) records
+operator PostgreSQL/browser readback and outage/recovery, plus retained limits.
+
+## Sprint 3 dashboard consumer
+
+The frontend now reads health, telemetry, windows, capture-status and monitoring
+session metadata through the same restricted Next.js GET relay. Both new GETs
+require `session_id` (UUID) and `mode` (LIVE/SIMULATION/REPLAY); omitted or invalid
+parameters return 400. Existing POST validation/idempotency is unchanged.
+
+| Extended GET | Response |
+| --- | --- |
+| `/api/v1/capture-status/?session_id=UUID&mode=LIVE` | Cursor page: `next`, `previous`, `results`; last 24 hours by observed_at, excluding future events; ordered `-observed_at`, `-id`; default limit 50, allowed 1..200, optional cursor |
+| `/api/v1/monitoring-sessions/?session_id=UUID&mode=LIVE` | One matching session object; 404 for unknown UUID or wrong mode, identical error; no age filter and no list/discovery |
+
+Capture results expose exactly id, session_id, received_at, observed_at, state,
+valid, reason, loss_started_at, gap_ended_at, monitoring_gap_seconds,
+recovery_attempts, run_id, mode and interface_name. An unknown capture session or
+wrong mode returns an empty page. Session metadata exposes exactly session_id,
+source_id, run_id, interface_name, mode, started_at, observation_profile,
+schema_version and received_at. Neither endpoint exposes payload_digest or any
+unrelated session. Authentication remains deferred; existing local boundaries
+and no-store behaviour apply. Database errors still return redacted 503.
+
+The relay fixes limits at 60 samples, 20 windows and 20 status events; session
+metadata has no pagination. UI capture state is the latest **reported** event,
+not a physical link check; stale/missing/error states remain explicit. Stored gap
+seconds are displayed without interpolation or conversion into traffic. No model,
+schema or migration changes were needed. See [FRONTEND_SETUP.md](FRONTEND_SETUP.md),
+[manual smoke procedure](SPRINT3_SMOKE.md) and the ADR-024 continuation.
+
 ## Implemented initial Sprint 2 API - 2026-09-13
 
 Sprint 2 is **PASS for the agreed local backend scope**; see
@@ -44,7 +76,9 @@ GET requires `session_id` and `mode`; omitted/invalid values return 400. Optiona
 time (sample `observed_at`, window `end`) within the last 24 hours, newest first.
 Old REPLAY data and future timestamps are not current data merely because they
 were received recently. A nonexistent session or mismatched mode returns an empty
-result. PUT/PATCH/DELETE and status/session list routes are not implemented.
+result. PUT/PATCH/DELETE and general session discovery are not implemented.
+The scoped status/session GET extensions above supersede the original Sprint 2
+read limitation; the session GET returns 404 rather than an empty page.
 
 Other errors: 400 invalid data/unknown fields, 403 non-local/browser-origin access,
 404 unknown route/cursor, 405 method, 413 size, 415 non-JSON, 503 database failure.

@@ -1,5 +1,61 @@
 # Testing strategy
 
+## Final Sprint 3 sign-off
+
+**PASS for the agreed local dashboard scope.** Operator-verified PostgreSQL
+browser readback, stale/partial presentation, outage retention and automatic
+recovery are recorded in [SPRINT3_ACCEPTANCE.md](SPRINT3_ACCEPTANCE.md). Final
+checks pass: frontend 28 unit/route and 16 browser tests; backend 38; sensor 93;
+lint, typecheck, build, normal-settings Django check, migration consistency and
+git diff --check. Earlier totals/pending statements below are historical. No
+continuous uploading/latency, authentication or full-feature persistence pass
+is implied. No Sprint 4 or commit.
+
+## Sprint 3 outage-state regression
+
+**28/28 frontend unit/route, 16/16 production browser, 38/38 backend and 93/93
+sensor tests pass**, as do lint, typecheck, production build and git diff --check.
+The new outage/recovery browser regressions failed before the fix on loss of
+loaded metadata, then passed with retained historical data and explicit errors.
+Both initially fresh and stale records are covered; connectivity recovery never
+refreshes observation timestamps. UUID/mode remain selected. See
+[SPRINT3_OUTAGE_FIX.md](SPRINT3_OUTAGE_FIX.md). Manual real-service outage/recovery
+must still be repeated; the tests did not stop the operator's Django process.
+
+## Sprint 3 gateway normalization regression
+
+Current fix verification: **24/24 frontend unit/route**, **14/14 production browser**
+and **2/2 development real-route** checks pass. Backend **38/38**, sensor **93/93**,
+lint, typecheck, build and git diff --check pass. Actual NextRequest and unmocked
+Next-route tests close the earlier mocked-gateway coverage gap. See
+[root cause, preserved security and evidence](SPRINT3_GATEWAY_FIX.md). Full manual
+dashboard smoke must still be repeated; no sensor, Django or schema changes.
+
+## Sprint 3 scoped read continuation
+
+Backend **38/38**, frontend unit/route **18/18**, browser **12/12** and sensor
+**93/93** pass. Added coverage verifies required query fields, session/mode
+isolation, time ordering and 24-hour filtering, limit/cursor bounds, exact
+provenance, session metadata/404, all four capture states, stale/missing/error
+handling and suppression of current rates after a newer loss event. Original
+POST/idempotency regressions still pass. Lint, typecheck, production build,
+normal PostgreSQL-settings Django check and migration consistency pass;
+no migrations changed. `git diff --check` passes. Manual live evidence is still
+pending; use [SPRINT3_SMOKE.md](SPRINT3_SMOKE.md). Earlier totals below are dated
+implementation history, not current test totals.
+
+## Sprint 3 frontend verification
+
+Frontend lint, TypeScript and production build pass. **13/13 unit/route tests**
+and **6/6 Microsoft Edge browser tests** pass, covering strict API parsing,
+provenance, unavailable/stale/null handling, bounded relay/backoff, loading/empty/
+error states, measured zero, partial windows, selection cancellation and mobile
+overflow. Screenshots at desktop and 390px mobile were inspected. Browser fixture
+data is isolated SIMULATION metadata; it does not write to Django or prove live
+capture. Existing backend **31/31** (0.707 seconds) and sensor **93/93** (4.244
+seconds) pass. `git diff --check` passes. See [FRONTEND_SETUP.md](FRONTEND_SETUP.md)
+for commands and the explicitly partial status/session/live-integration evidence.
+
 ## Final Sprint 2 sign-off - 2026-09-13
 
 **PASS for the agreed backend scope.** [Final acceptance report](SPRINT2_ACCEPTANCE.md)

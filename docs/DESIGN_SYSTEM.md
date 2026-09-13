@@ -1,5 +1,14 @@
 # Design system
 
+Sprint 3 implementation uses the dark tokens below with responsive plain CSS,
+system fonts and accessible HTML tables. One page has five monitor sections;
+no future ML navigation is scaffolded. Charts show separate measured points,
+not lines through missing intervals. Capture/gap data unavailable from the API
+stays explicitly unavailable. The continuation displays stored capture events,
+gaps and session metadata; a stale report is historical, and physical interface
+link state remains unavailable. See [frontend setup](FRONTEND_SETUP.md).
+This current authorization supersedes the earlier setup prohibition below.
+
 ## Product direction
 
 A simple professional dashboard for a Windows student laptop and projector. Answer: what traffic is observable now, is the selected interface being monitored, which complete windows are unusual, and what observed evidence explains them? An anomaly is not an attack; no findings is not a secure-network verdict.

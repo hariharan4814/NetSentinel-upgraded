@@ -1,5 +1,39 @@
 # Architecture
 
+Sprint 3 frontend implementation: see [dashboard setup and limits](FRONTEND_SETUP.md).
+This supersedes older "frontend not started" statements only for the current
+authorized dashboard scope. **Sprint 3 PASS**: scoped capture/session readback
+and real manual outage/recovery are verified for this local dashboard scope.
+See [final acceptance and limits](SPRINT3_ACCEPTANCE.md).
+
+## ADR-024: Local read-only dashboard boundary
+
+**Continuation accepted:** the user authorized scoped GET on existing
+capture-status and monitoring-sessions routes. Reuse the original recent query,
+pagination and time filter via common/reads.py; add a two-field session lookup
+returning one metadata object or 404. No models, migrations, ingestion semantics
+or sensor changes. The relay allowlist now includes these two reads. This closes
+the earlier missing-read limitation below; manual stored-data smoke now passes,
+while numerical latency/continuous ingestion evidence remains deferred. Recorded capture state is shown with observed-time freshness,
+and gaps remain event values, never inferred traffic or physical link state.
+
+**Accepted for Sprint 3.** Use Next.js App Router/TypeScript in `frontend/`,
+small React components and plain responsive CSS. No UI/chart/query dependency
+is necessary for this bounded initial view. The browser talks to a same-origin
+read-only Next route, which calls only the existing Django health, telemetry
+and window GETs with a server-only loopback URL. Reason: Django intentionally
+rejects browser Origin requests; preserve that boundary instead of weakening it
+or adding CORS. Consequences: the relay must remain loopback-only, validate
+Host/Origin and upstream paths, refuse redirects/mutations and never forward
+browser credentials. This is not authentication or an externally exposed proxy.
+
+Two-second non-overlapping polling uses cancellation/backoff and no cached
+cross-session results. A five-second display freshness policy is separate from
+sensor thresholds. Missing status/session read endpoints show unavailable;
+neither capture state nor gap duration is inferred from telemetry. No database
+schema or frozen feature contract changes are made. Those API gaps block full
+Sprint 3 status integration, not the implemented read-only telemetry dashboard.
+
 Initial Sprint 2 backend implemented, 2026-09-13: monitoring and telemetry Django
 apps, DRF, environment-based PostgreSQL configuration and exactly four models.
 SQLite is restricted to automated test/check tooling. Sprint 2 is PASS for the

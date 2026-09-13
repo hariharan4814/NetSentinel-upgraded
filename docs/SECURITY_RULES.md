@@ -1,5 +1,24 @@
 # Security rules
 
+## Sprint 3 local dashboard boundary
+
+Guard correction: NextRequest normalizes loopback URLs to localhost. Validate
+the incoming local Host and port, tolerate that internal normalization, and
+compare supplied Origin/Referer against the wire Host origin. Do not equate
+localhost and 127.0.0.1 as browser origins. Origin/Referer can be absent on GET;
+local CLI requests remain permitted, while explicit cross-origin/non-local
+requests fail. Forwarded headers confer no authority. See
+[gateway fix evidence](SPRINT3_GATEWAY_FIX.md); local-only bindings remain required.
+
+Authentication remains intentionally deferred by the current task. Next.js binds
+to loopback and provides a fixed GET-only relay for existing read endpoints.
+It validates local Host/same-origin requests and a server-configured loopback
+upstream, rejects redirects and forwards no browser credentials/Origin headers.
+Django's checks remain unchanged. This narrowly scoped local read relay is the
+ADR-024 exception to the earlier blanket no-proxy guidance; no external reverse
+proxy or LAN exposure is authorized. Neither service authenticates local processes.
+No mutation route, CORS wildcard, sensor control or database credential is added.
+
 ## Initial Sprint 2 exception - 2026-09-13
 
 The current user task explicitly defers authentication. This supersedes the

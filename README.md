@@ -1,5 +1,13 @@
 # NetSentinel
 
+**Sprint 3 PASS for the agreed local dashboard scope.** PostgreSQL-backed browser
+readback, outage retention and automatic recovery are operator-verified; see
+[final evidence and retained limitations](docs/SPRINT3_ACCEPTANCE.md).
+Run the local Next.js frontend using [FRONTEND_SETUP.md](docs/FRONTEND_SETUP.md).
+It reads the existing API, preserves missing/partial data, and leaves backend
+schema and sensor behaviour unchanged. No ML or Sprint 4 work is started.
+The Sprint 2 sign-off below describes its original completed backend scope.
+
 **NetSentinel: An Intelligent Real-Time Network Monitoring and Anomaly Detection System**
 
 An M.Sc. final-year project for genuine network monitoring on a Windows laptop, Isolation Forest anomaly detection, observed-feature explanations and a safe, clearly labelled demonstration lab.

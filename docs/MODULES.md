@@ -1,5 +1,11 @@
 # Module responsibilities
 
+Sprint 3 adds `frontend/` for presentation and a bounded GET relay only.
+It imports neither sensor nor Django code. No Django apps, models or endpoints
+change in the initial frontend work. The continuation extends two existing GET
+routes for scoped status/session reads using shared bounded read plumbing;
+see [FRONTEND_SETUP.md](FRONTEND_SETUP.md) and ADR-024.
+
 Initial Sprint 2 implementation, 2026-09-13: the monitoring app owns sessions and
 status; telemetry owns aggregate samples/windows, ingestion and explicit pruning.
 These are the only Django domain apps. The user's current task defers all
