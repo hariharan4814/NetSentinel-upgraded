@@ -1,5 +1,5 @@
 import { MODES, UUID } from "./contracts";
-export const READ_RESOURCES = ["health", "telemetry", "windows", "capture-status", "monitoring-sessions"];
+export const READ_RESOURCES = ["health", "telemetry", "windows", "capture-status", "monitoring-sessions", "anomaly-results", "model-versions"];
 
 export function localRequest(request: Request): boolean {
   try {
@@ -40,7 +40,9 @@ export function upstreamURL(base: string | undefined, resource: string, query: U
     if (!UUID.test(session) || !(MODES as readonly string[]).includes(mode)) throw new Error("A session UUID and mode are required.");
     url.searchParams.set("session_id", session.toLowerCase());
     url.searchParams.set("mode", mode);
-    if (resource !== "monitoring-sessions") url.searchParams.set("limit", resource === "telemetry" ? "60" : "20");
+    if (resource !== "monitoring-sessions" && resource !== "model-versions") {
+      url.searchParams.set("limit", resource === "telemetry" || resource === "anomaly-results" ? "60" : "20");
+    }
   }
   return url;
 }

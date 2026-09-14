@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { currentRate, decodePage, formatRate, pollDelay, type Sample } from "../src/lib/contracts";
+import { currentRate, decodePage, formatRate, pollDelay, type Sample, type AnomalyResult } from "../src/lib/contracts";
 import { localRequest, upstreamURL } from "../src/lib/gateway";
 
 const selection = { session: "11111111-1111-1111-1111-111111111111", mode: "SIMULATION" as const };
@@ -60,4 +60,43 @@ test("browser boundary rejects cross-origin, cross-site and DNS-rebinding hosts"
 });
 test("poll backoff grows and is capped", () => {
   assert.deepEqual([0,1,2,3,4,100].map(pollDelay), [2000,4000,8000,16000,30000,30000]);
+});
+
+test("anomaly decoder decodes valid explanations and rejects invalid bounds/labels", () => {
+  const anomaly = {
+    id: "22222222-2222-2222-2222-222222222222",
+    session_id: selection.session,
+    run_id: "33333333-3333-3333-3333-333333333333",
+    interface_name: "fixture",
+    mode: "SIMULATION" as const,
+    window_id: "55555555-5555-5555-5555-555555555555",
+    model_version_id: "66666666-6666-6666-6666-666666666666",
+    observed_at: "2026-09-13T10:00:00Z",
+    scored_at: "2026-09-13T10:00:01Z",
+    anomaly_score: 0.7314,
+    threshold: 0.7191,
+    label: "ANOMALOUS" as const,
+    explanation: "Observed throughput is higher than the learned baseline range.",
+    deviating_features: ["ip_bytes_per_second"],
+  };
+
+  const decoded = decodePage<AnomalyResult>({ next: null, results: [anomaly] }, "anomaly-results", selection);
+  assert.equal(decoded.results.length, 1);
+  assert.equal(decoded.results[0].anomaly_score, 0.7314);
+  assert.equal(decoded.results[0].threshold, 0.7191);
+  assert.equal(decoded.results[0].label, "ANOMALOUS");
+  assert.equal(decoded.results[0].explanation, "Observed throughput is higher than the learned baseline range.");
+  assert.deepEqual(decoded.results[0].deviating_features, ["ip_bytes_per_second"]);
+
+  // Accepts null/undefined threshold
+  const noThreshold = decodePage<AnomalyResult>({ next: null, results: [{ ...anomaly, threshold: null }] }, "anomaly-results", selection);
+  assert.equal(noThreshold.results[0].threshold, null);
+
+  // Rejects invalid score bounds (< 0, > 1)
+  assert.throws(() => decodePage({ next: null, results: [{ ...anomaly, anomaly_score: 1.5 }] }, "anomaly-results", selection));
+  assert.throws(() => decodePage({ next: null, results: [{ ...anomaly, anomaly_score: -0.1 }] }, "anomaly-results", selection));
+  // Rejects invalid threshold bounds (< 0, > 1)
+  assert.throws(() => decodePage({ next: null, results: [{ ...anomaly, threshold: 2.0 }] }, "anomaly-results", selection));
+  // Rejects invalid labels
+  assert.throws(() => decodePage({ next: null, results: [{ ...anomaly, label: "ATTACK" }] }, "anomaly-results", selection));
 });

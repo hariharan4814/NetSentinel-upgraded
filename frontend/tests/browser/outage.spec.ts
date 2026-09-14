@@ -21,6 +21,7 @@ for (const historical of [false, true]) {
       if (path.endsWith("capture-status")) json = { next: null, results: [{ ...identity, received_at: observed,
         observed_at: observed, state: "RUNNING", valid: true, reason: null, loss_started_at: null, gap_ended_at: null,
         monitoring_gap_seconds: 0, recovery_attempts: 0 }] };
+      if (path.endsWith("anomaly-results")) json = { next: null, results: [] };
       return route.fulfill({ json });
     });
     await page.goto("/");

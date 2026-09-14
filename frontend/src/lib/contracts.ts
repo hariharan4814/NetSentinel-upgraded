@@ -21,6 +21,12 @@ export type CaptureStatus = Identity & {
 export type Session = Omit<Identity, "id"> & {
   source_id: string; started_at: string; received_at: string; observation_profile: string; schema_version: string;
 };
+export type AnomalyResult = Identity & {
+  window_id: string; model_version_id: string; observed_at: string; scored_at: string;
+  anomaly_score: number; threshold?: number | null; label: "NORMAL" | "ANOMALOUS"; explanation: string; deviating_features: string[];
+};
+
+export const ANOMALY_DISCLAIMER = "Anomaly indicates statistical deviation from the learned baseline, not confirmed malicious activity.";
 
 export function decodeSession(value: unknown, selection: Selection): Session {
   const row = record(value);
@@ -56,7 +62,7 @@ function count(value: unknown) {
 function rate(value: unknown) {
   if (value !== null && (typeof value !== "number" || !Number.isFinite(value) || value < 0)) throw new Error("Invalid API rate.");
 }
-export function decodePage<T extends Sample | Window | CaptureStatus>(value: unknown, kind: "telemetry" | "windows" | "capture-status", selection: Selection): Page<T> {
+export function decodePage<T extends Sample | Window | CaptureStatus | AnomalyResult>(value: unknown, kind: "telemetry" | "windows" | "capture-status" | "anomaly-results", selection: Selection): Page<T> {
   const page = record(value);
   if (!Array.isArray(page.results) || page.results.length > 60 || (page.next !== null && typeof page.next !== "string")) throw new Error("Invalid API page.");
   for (const item of page.results) {
@@ -64,6 +70,16 @@ export function decodePage<T extends Sample | Window | CaptureStatus>(value: unk
     if (row.session_id !== selection.session || row.mode !== selection.mode) throw new Error("API provenance mismatch.");
     for (const key of ["id", "run_id"]) { text(row[key]); if (!UUID.test(row[key])) throw new Error("Invalid API identity."); }
     text(row.interface_name);
+    if (kind === "anomaly-results") {
+      timestamp(row.observed_at); timestamp(row.scored_at);
+      for (const key of ["window_id", "model_version_id"]) { text(row[key]); if (!UUID.test(row[key])) throw new Error("Invalid anomaly identity."); }
+      if (typeof row.anomaly_score !== "number" || !Number.isFinite(row.anomaly_score) || row.anomaly_score < 0 || row.anomaly_score > 1) throw new Error("Invalid anomaly score.");
+      if (row.threshold !== undefined && row.threshold !== null && (typeof row.threshold !== "number" || !Number.isFinite(row.threshold) || row.threshold < 0 || row.threshold > 1)) throw new Error("Invalid anomaly threshold.");
+      if (row.label !== "NORMAL" && row.label !== "ANOMALOUS") throw new Error("Invalid anomaly label.");
+      text(row.explanation);
+      if (!Array.isArray(row.deviating_features)) throw new Error("Invalid deviating features array.");
+      continue;
+    }
     if (typeof row.valid !== "boolean" || (row.reason !== null && typeof row.reason !== "string")) throw new Error("Invalid API validity.");
     if (kind === "telemetry") {
       timestamp(row.observed_at); rate(row.upload_bytes_per_second); rate(row.download_bytes_per_second);

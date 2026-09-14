@@ -140,3 +140,45 @@ class DetectionTests(APITestCase):
         self.assertEqual(self.client.get(url, query | {"source_id": str(uuid4())}).status_code, 404)
         self.assertEqual(self.client.get(url).status_code, 400)
         self.assertEqual(self.client.get("/api/v1/anomaly-results/").status_code, 400)
+
+    def test_explainability_normal_and_anomalous(self):
+        from detection.explain import explain_anomaly
+        # 1. Normal window explanation is neutral
+        normal_res = explain_anomaly(self.window["features"], label="NORMAL")
+        self.assertEqual(normal_res["explanation"], "Within learned baseline range")
+        self.assertEqual(normal_res["deviating_features"], [])
+
+        # 2. Anomalous window with specific burst rates identifies deviating features
+        anomalous_features = {
+            "packets_per_second": 850.0,         # > p95 (80)
+            "ip_bytes_per_second": 700000.0,     # > p95 (60000)
+            "outbound_byte_fraction": 0.5,       # <= p95 (0.95)
+            "unique_remote_peers": 40,           # > p95 (10)
+            "tcp_syn_fraction": 0.02,            # <= p95 (0.15)
+            "udp_fraction": 0.05,                # <= p95 (0.50)
+            "mean_ip_packet_bytes": 800.0,       # <= p95 (1200)
+        }
+        anom_res = explain_anomaly(anomalous_features, label="ANOMALOUS")
+        self.assertIn("throughput", anom_res["explanation"])
+        self.assertIn("packet rate", anom_res["explanation"])
+        self.assertIn("remote peer", anom_res["explanation"])
+        self.assertEqual(set(anom_res["deviating_features"]), {"ip_bytes_per_second", "packets_per_second", "unique_remote_peers"})
+
+        # 3. Strictly neutral vocabulary: no attack, malware, threat or intrusion words
+        for bad_word in ("attack", "malware", "threat", "intrusion", "exfiltration", "malicious"):
+            self.assertNotIn(bad_word, anom_res["explanation"].lower())
+            self.assertNotIn(bad_word, normal_res["explanation"].lower())
+
+    def test_anomaly_api_response_includes_explanation(self):
+        self.ingest()
+        result = self.result()
+        self.assertEqual(self.post("anomaly-results", result).status_code, 201)
+        response = self.client.get("/api/v1/anomaly-results/", {"session_id": self.session["session_id"], "mode": "SIMULATION"})
+        self.assertEqual(response.status_code, 200)
+        item = response.data["results"][0]
+        self.assertIn("explanation", item)
+        self.assertIn("deviating_features", item)
+        self.assertIn("threshold", item)
+        self.assertEqual(item["threshold"], self.manifest["threshold"])
+        self.assertEqual(item["explanation"], "Within learned baseline range")
+        self.assertEqual(item["deviating_features"], [])

@@ -3,6 +3,7 @@ from common.serializers import StrictModelSerializer, SessionRecordSerializer
 from telemetry.models import TrafficWindow
 from telemetry.serializers import TrafficWindowSerializer
 from .contract import validate_manifest, eligible, profile, aware
+from .explain import explain_anomaly
 from .models import ModelVersion, AnomalyResult
 
 
@@ -28,11 +29,30 @@ class ModelVersionSerializer(StrictModelSerializer):
 class AnomalyResultSerializer(SessionRecordSerializer):
     window_id = serializers.PrimaryKeyRelatedField(source="window", queryset=TrafficWindow.objects.select_related("session"), pk_field=serializers.UUIDField())
     model_version_id = serializers.PrimaryKeyRelatedField(source="model_version", queryset=ModelVersion.objects.all(), pk_field=serializers.UUIDField())
+    threshold = serializers.SerializerMethodField()
+    explanation = serializers.SerializerMethodField()
+    deviating_features = serializers.SerializerMethodField()
 
     class Meta:
         model = AnomalyResult
-        fields = SessionRecordSerializer.identity_fields + ("window_id", "model_version_id", "observed_at", "scored_at", "anomaly_score", "label")
+        fields = SessionRecordSerializer.identity_fields + (
+            "window_id", "model_version_id", "observed_at", "scored_at",
+            "anomaly_score", "threshold", "label", "explanation", "deviating_features"
+        )
         validators = []
+
+    def get_threshold(self, obj):
+        if hasattr(obj, "model_version") and obj.model_version and isinstance(obj.model_version.manifest, dict):
+            return obj.model_version.manifest.get("threshold")
+        return None
+
+    def get_explanation(self, obj):
+        features = obj.window.features if hasattr(obj, "window") and obj.window else None
+        return explain_anomaly(features, label=obj.label)["explanation"]
+
+    def get_deviating_features(self, obj):
+        features = obj.window.features if hasattr(obj, "window") and obj.window else None
+        return explain_anomaly(features, label=obj.label)["deviating_features"]
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
