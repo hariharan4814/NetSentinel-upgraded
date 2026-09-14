@@ -51,7 +51,22 @@ Promotion requires a compatibility manifest comparing observation unit, visibili
 
 Collect consented normal activity across idle, browsing, streaming, downloads, and different time periods. Keep a reviewed manifest; benign collection may contain unknown anomalies. Train one host observation-profile model initially. A new adapter/profile or insufficient baseline shows “learning / ML unavailable” while real counters/flows remain useful. Avoid claiming learning completion from an arbitrary number of highly correlated windows; record distinct sessions/days, non-idle samples and feature variability.
 
-Split chronologically by whole sessions into training, calibration, and locked test sets (provisional 60/20/20). Keep related devices/scenario runs together where necessary to prevent leakage. Avoid random overlapping-window splits. Fit preprocessing/model on training only, select threshold on calibration only, and evaluate test once after choices are frozen. If sessions are insufficient, disclose exploratory results rather than reporting a reliable generalization estimate.
+### Pilot / Prototype Baseline Specification (Sprint 4)
+
+For the Sprint 4 pilot/prototype baseline, the following requirements apply:
+- **Minimum dataset size:** at least 300 eligible LIVE windows.
+- **Run diversity:** at least 3 independent capture runs.
+- **Temporal diversity:** at least 2 distinct UTC calendar dates.
+- **Chronological split:**
+  - **180 training windows** (earliest chronological segment).
+  - **60 calibration windows** (used solely for p99 threshold selection).
+  - **60 held-out test windows** (evaluated once after model and threshold freeze).
+  - Any extra windows beyond the initial 300 required for the pilot split remain unused at the end of the chronological sequence to preserve exact split sizes.
+- **Features:** All seven frozen host-v1 features are preserved without modification.
+- **Provenance:** Baseline training uses strictly LIVE traffic (no synthetic or demo data).
+- **Production recommendation:** Longer multi-day collection (e.g., 5+ runs across multiple working days with varied traffic patterns) is strongly recommended for production deployment to capture broader seasonal and diurnal variations.
+
+Fit preprocessing/model on training only, select threshold on calibration only, and evaluate test once after choices are frozen. If sessions are insufficient, disclose exploratory results rather than reporting a reliable generalization estimate.
 
 Reset rolling feature/rule context at split boundaries or explicitly reserve a preceding warm-up segment whose samples are not scored. Do not let duplicates, future peer history, labels or a later threshold choice leak backward. Group repeated scenario templates/seeds appropriately and reserve unseen variants for evaluation. Demonstration fixtures are development/integration data, separate from the locked research set. These controls follow the principles in scikit-learn's [data-leakage guidance](https://scikit-learn.org/stable/common_pitfalls.html).
 

@@ -13,6 +13,7 @@ credentials/
 # Python environments, caches, build outputs
 .venv/
 .venv-backend/
+.venv-ml/
 venv/
 env/
 __pycache__/

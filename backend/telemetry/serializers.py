@@ -2,6 +2,7 @@ import math
 from rest_framework import serializers
 from common.serializers import SessionRecordSerializer
 from .models import TelemetrySample, TrafficWindow
+from detection.contract import eligible
 
 
 class TelemetrySampleSerializer(SessionRecordSerializer):
@@ -56,7 +57,8 @@ class TrafficWindowSerializer(SessionRecordSerializer):
             "start", "end", "finalized_at", "processed_at", "measurement_source", "schema_version",
             "partial", "valid", "reason", "packets", "ip_bytes", "outbound_packets", "inbound_packets",
             "unknown_packets", "outbound_bytes", "inbound_bytes", "unknown_bytes", "tcp_packets",
-            "udp_packets", "other_packets", "flow_count", "dropped", "kernel_loss")
+            "udp_packets", "other_packets", "flow_count", "dropped", "kernel_loss",
+            "features", "feature_schema_version", "capture_context")
         extra_kwargs = {name: {"default": 0} for name in ("unknown_packets", "unknown_bytes", "other_packets", "dropped")}
         validators = []
 
@@ -91,4 +93,10 @@ class TrafficWindowSerializer(SessionRecordSerializer):
               or start < attrs["session"].started_at
               or (attrs["finalized_at"] - end).total_seconds() < 2):
             raise serializers.ValidationError("Complete windows require full session coverage, no drops/reason, and finalization at end+2 or later.")
+        sidecar = ("features", "feature_schema_version", "capture_context")
+        if any(attrs.get(key) is not None for key in sidecar):
+            try:
+                eligible(attrs)
+            except (ValueError, KeyError, TypeError) as exc:
+                raise serializers.ValidationError({"features": str(exc)}) from exc
         return attrs

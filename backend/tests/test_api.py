@@ -77,10 +77,10 @@ class BackendTests(APITestCase):
         self.assertEqual(response.status_code, 503)
         self.assertNotIn("password", str(response.data))
 
-    def test_only_four_application_models(self):
+    def test_only_six_application_models(self):
         from django.apps import apps
         self.assertEqual({model.__name__ for model in apps.get_models()},
-                         {"MonitoringSession", "CaptureStatus", "TelemetrySample", "TrafficWindow"})
+                           {"MonitoringSession", "CaptureStatus", "TelemetrySample", "TrafficWindow", "ModelVersion", "AnomalyResult"})
 
     def test_round_trip_records_preserves_session_provenance_and_utc(self):
         for endpoint, data in [("telemetry", self.sample()), ("windows", self.window()), ("capture-status", self.status())]:

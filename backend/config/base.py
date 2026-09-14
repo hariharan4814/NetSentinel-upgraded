@@ -4,7 +4,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parents[1]
 DEBUG = False
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "[::1]"]
-INSTALLED_APPS = ["rest_framework", "monitoring", "telemetry"]
+INSTALLED_APPS = ["rest_framework", "monitoring", "telemetry", "detection"]
 MIDDLEWARE = ["django.middleware.security.SecurityMiddleware", "common.middleware.LocalOnlyMiddleware"]
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"

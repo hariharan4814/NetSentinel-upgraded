@@ -29,6 +29,10 @@ class TelemetrySample(SessionRecord):
 
 
 class TrafficWindow(SessionRecord):
+    # Optional additive host-v1 sidecar. Legacy records remain unscorable.
+    features = models.JSONField(null=True, blank=True)
+    feature_schema_version = models.CharField(max_length=40, null=True, blank=True)
+    capture_context = models.JSONField(null=True, blank=True)
     start = models.DateTimeField()
     end = models.DateTimeField()
     finalized_at = models.DateTimeField()

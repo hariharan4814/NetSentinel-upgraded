@@ -1,10 +1,17 @@
 # Architecture
 
-Sprint 3 frontend implementation: see [dashboard setup and limits](FRONTEND_SETUP.md).
-This supersedes older "frontend not started" statements only for the current
-authorized dashboard scope. **Sprint 3 PASS**: scoped capture/session readback
-and real manual outage/recovery are verified for this local dashboard scope.
-See [final acceptance and limits](SPRINT3_ACCEPTANCE.md).
+Sprint 4 ML and detection implementation: offline dataset export/validation/training/scoring pipeline and backend model metadata + anomaly result storage.
+**Sprint 4 PASS**: all frozen host-v1 feature validations, manifest checks, migrations, offline pipeline commands, API serializers, views and tests are implemented and passing.
+Real LIVE model training is deferred pending collection of genuine multi-session live traffic; synthetic training data is strictly prohibited.
+
+## ADR-025: Host-v1 offline Isolation Forest engine and detection metadata API
+
+**Accepted for Sprint 4.**
+1. **Separation of concerns**: Offline ML workflow in `ml/` operates independently via CLI. Django backend (`backend/detection/`) stores model metadata (`ModelVersion`) and anomaly scores (`AnomalyResult`), but never loads or executes pickle/joblib model artifacts inside Django request handling.
+2. **Strict provenance and scientific constraints**: `LIVE`, `SIMULATION`, and `REPLAY` modes are partitioned end-to-end and cannot be mixed or relabelled. Isolation Forest anomaly scores represent negative `score_samples` (deviation from baseline), not attack probabilities. Output labels are strictly `NORMAL` or `ANOMALOUS`; labels like `ATTACK`, `MALWARE`, `INTRUSION`, `EXFILTRATION` are forbidden.
+3. **Frozen seven-feature contract & eligibility**: Exact seven host-v1 features (`packets_per_second`, `ip_bytes_per_second`, `outbound_byte_fraction`, `unique_remote_peers`, `tcp_syn_fraction`, `udp_fraction`, `mean_ip_packet_bytes`) matching `sensor/features.py`. Partial, unfinalized, or corrupted windows are strictly ineligible for ML scoring.
+4. **Baseline training gate**: Requires >= 5 independent whole-run sessions across >= 2 UTC dates, >= 300 train / >= 100 calibration / >= 100 test samples, >= 20% non-idle samples, and >= 2 varying features.
+5. **Trusted artifact serialization**: Models are saved locally as compressed `model.joblib` bundles along with immutable `manifest.json`. Loading requires explicit SHA-256 digest match verification before unpickling.
 
 ## ADR-024: Local read-only dashboard boundary
 
@@ -221,5 +228,6 @@ explicit limitations; kernel loss remains unknown. Full gates still precede web 
 | 013 | Early age/row/disk telemetry budgets | A bounded capture queue does not bound PostgreSQL growth | Accepted |
 | 014 | Phase 1A psutil-only runtime; fail-closed capture preflight | Npcap was absent during Phase 1A. Pin tested psutil 7.2.2 on Python 3.11.0; pure metadata fixtures prove aggregation only. | Historical Phase 1A; capture portion superseded by ADR-015 |
 | 015 | One selected Npcap interface, Scapy AsyncSniffer and metadata-only queue | Phase 1B verifies Windows alias-to-index and Npcap mapping, store=False, non-promiscuous IP filter, callback normalization and independent timer-driven aggregation. Driver is manually installed. Queue/parser loss conservatively invalidates remaining session windows; kernel loss stays unknown. CLI prints summaries only; packet objects/payloads are not persisted. | Accepted for Phase 1B; full Sprint 1 remains partial |
+| 025 | Offline Isolation Forest & detection metadata API | Offline CLI, strict 7-feature contract, 5+ run baseline gate, metadata-only Django app | Accepted |
 
 Phases 1A/1B implement only sensor/ and tests/sensor/. Frontend, backend and detection remain future boundaries. Evidence is in [SPRINT1_FEASIBILITY_REPORT.md](SPRINT1_FEASIBILITY_REPORT.md).
