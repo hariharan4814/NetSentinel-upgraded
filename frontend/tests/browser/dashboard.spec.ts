@@ -33,6 +33,67 @@ async function select(page: Page, mode = "SIMULATION") {
   await page.getByRole("button", { name: "View session" }).click();
 }
 
+test("renders sticky top header navigation and footer without sidebar", async ({ page }) => {
+  await page.route("**/api/backend/**", (route) =>
+    mockReply(route, { json: route.request().url().includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } })
+  );
+  await page.goto("/");
+
+  // 1. Verify Top Header is present and sticky
+  const header = page.locator("header.top-nav");
+  await expect(header).toBeVisible();
+  await expect(header.locator(".brand")).toContainText("NetSentinel");
+  await expect(header.locator(".brand-badge")).toHaveText("Local");
+
+  // 2. Verify Left Sidebar is completely removed
+  await expect(page.locator("aside.sidebar")).toHaveCount(0);
+
+  // 3. Verify all 6 Top Navigation links render
+  const nav = page.locator(".desktop-nav");
+  await expect(nav.getByRole("link", { name: "Overview" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Anomaly Detection" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Live Telemetry" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Traffic Windows" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Capture & Interface" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Session Summary" })).toBeVisible();
+
+  // 4. Verify Header status indicator & mode badge
+  await expect(header.locator(".badge")).toHaveText("LIVE");
+  await expect(header.locator(".status-indicator")).toContainText("Backend reachable");
+
+  // 5. Verify Footer renders with branding, tech stack, and scientific disclaimer
+  const footer = page.locator("footer.app-footer");
+  await expect(footer).toBeVisible();
+  await expect(footer).toContainText("NetSentinel");
+  await expect(footer).toContainText("Intelligent Network Monitoring & Anomaly Detection");
+  await expect(footer).toContainText("Own-host observation");
+  await expect(footer).toContainText("Next.js · Django · PostgreSQL · Isolation Forest");
+  await expect(footer).toContainText("Anomalies indicate statistical deviation, not confirmed malicious activity.");
+});
+
+test("mobile responsive header opens hamburger menu and closes on selection", async ({ page }) => {
+  await page.route("**/api/backend/**", (route) =>
+    mockReply(route, { json: route.request().url().includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } })
+  );
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  // Verify desktop nav is hidden and hamburger button is visible
+  await expect(page.locator(".desktop-nav")).not.toBeVisible();
+  const toggleBtn = page.getByRole("button", { name: /toggle navigation menu/i });
+  await expect(toggleBtn).toBeVisible();
+
+  // Open mobile drawer
+  await toggleBtn.click();
+  const mobileNav = page.locator(".mobile-nav");
+  await expect(mobileNav).toBeVisible();
+  await expect(mobileNav.getByRole("link", { name: "Anomaly Detection" })).toBeVisible();
+
+  // Clicking link in mobile menu closes drawer
+  await mobileNav.getByRole("link", { name: "Overview" }).click();
+  await expect(page.locator(".mobile-nav")).toHaveCount(0);
+});
+
 test("empty states, local navigation and mobile layout", async ({ page }, testInfo) => {
   await page.route("**/api/backend/**", (route) =>
     mockReply(route, { json: route.request().url().includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } })
@@ -81,6 +142,7 @@ test("previous mode requests cannot repopulate the new selection", async ({ page
   await select(page, "REPLAY");
   release();
   await expect(page.locator(".status-strip .badge")).toHaveText("REPLAY");
+  await expect(page.locator("header.top-nav .badge")).toHaveText("REPLAY");
   await expect(page.getByText("No recent telemetry for this session", { exact: false })).toBeVisible();
 });
 
@@ -106,7 +168,7 @@ test("backend errors never become zero rates", async ({ page }) => {
   await page.route("**/api/backend/**", (route) => mockReply(route, { status: 503, json: { error: "Backend unavailable or request timed out." } }));
   await page.goto("/");
   await select(page);
-  await expect(page.getByText("Backend unavailable", { exact: true })).toBeVisible();
+  await expect(page.getByText("Backend unavailable", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("0.0 B/s", { exact: true })).toHaveCount(0);
   await expect(page.locator(".metric").first()).toContainText("Unavailable");
 });
@@ -186,7 +248,7 @@ test("renders anomaly detection section with evidence-based explanation and disc
 
   // 3. Verify mandatory scientific disclaimer
   await expect(
-    page.getByText("Anomaly indicates statistical deviation from the learned baseline, not confirmed malicious activity.")
+    page.locator("#anomaly").getByText("Anomaly indicates statistical deviation from the learned baseline, not confirmed malicious activity.")
   ).toBeVisible();
 
   // 4. Verify no attack words

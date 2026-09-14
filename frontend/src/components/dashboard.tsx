@@ -1,6 +1,6 @@
 "use client";
-import { useState, type FormEvent, type ReactNode } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, type FormEvent, type ReactNode } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   MODES,
   UUID,
@@ -20,17 +20,273 @@ import {
 } from "@/lib/contracts";
 import { useMonitor } from "@/lib/use-monitor";
 
-// Animation Variants (Framer Motion)
-const fadeInUp = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -8 },
-  transition: { duration: 0.25, ease: "easeOut" as const },
-};
+// Hook to check backend health even when no session is selected
+function useGlobalHealth(activeHealthData?: boolean, activeLoaded?: boolean) {
+  const [reachable, setReachable] = useState<boolean | null>(null);
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    if (activeLoaded) {
+      return;
+    }
+
+    let disposed = false;
+    async function check() {
+      try {
+        const res = await fetch("/api/backend/health", { cache: "no-store" });
+        if (!res.ok) throw new Error("Health check failed");
+        const json = await res.json();
+        if (!disposed) {
+          setReachable(json.status === "ok" && json.database === "reachable");
+          setChecked(true);
+        }
+      } catch {
+        if (!disposed) {
+          setReachable(false);
+          setChecked(true);
+        }
+      }
+    }
+
+    void check();
+    const interval = setInterval(check, 10000);
+    return () => {
+      disposed = true;
+      clearInterval(interval);
+    };
+  }, [activeLoaded]);
+
+  const isReachable = activeLoaded ? activeHealthData : reachable;
+  const isChecked = activeLoaded ? true : checked;
+
+  return { reachable: isReachable, checked: isChecked };
+}
+
+// Active Section Tracker (ScrollSpy)
+const NAV_SECTIONS = [
+  { id: "overview", label: "Overview" },
+  { id: "anomaly", label: "Anomaly Detection" },
+  { id: "telemetry", label: "Live Telemetry" },
+  { id: "windows", label: "Traffic Windows" },
+  { id: "capture", label: "Capture & Interface" },
+  { id: "session", label: "Session Summary" },
+];
+
+function useScrollSpy(sectionIds: string[]) {
+  const [activeId, setActiveId] = useState<string>("overview");
+
+  useEffect(() => {
+    function handleScroll() {
+      const scrollPosition = window.scrollY + 120;
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sectionIds[i]);
+        if (el) {
+          const top = el.offsetTop;
+          if (scrollPosition >= top) {
+            setActiveId(sectionIds[i]);
+            return;
+          }
+        }
+      }
+      setActiveId(sectionIds[0]);
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [sectionIds]);
+
+  return activeId;
+}
+
+// Header Component
+function Header({
+  activeMode,
+  backendReachable,
+  backendChecked,
+}: {
+  activeMode: Mode;
+  backendReachable: boolean | undefined | null;
+  backendChecked: boolean;
+}) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const activeSection = useScrollSpy(NAV_SECTIONS.map((s) => s.id));
+  const shouldReduceMotion = useReducedMotion();
+
+  function scrollTo(id: string) {
+    setMobileOpen(false);
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: shouldReduceMotion ? "auto" : "smooth" });
+    }
+  }
+
+  return (
+    <header className="top-nav" role="banner">
+      <div className="top-nav-inner">
+        <a
+          className="brand"
+          href="#overview"
+          onClick={(e) => {
+            e.preventDefault();
+            scrollTo("overview");
+          }}
+          aria-label="NetSentinel Home"
+        >
+          <span className="brand-mark">N</span>
+          <span className="brand-name">NetSentinel</span>
+          <span className="brand-badge">Local</span>
+        </a>
+
+        <nav className="desktop-nav" aria-label="Main Navigation">
+          {NAV_SECTIONS.map((sec) => {
+            const isActive = activeSection === sec.id;
+            return (
+              <a
+                key={sec.id}
+                href={`#${sec.id}`}
+                className={`nav-link ${isActive ? "active" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollTo(sec.id);
+                }}
+              >
+                {sec.label}
+                {isActive && !shouldReduceMotion && (
+                  <motion.span
+                    className="nav-active-pill"
+                    layoutId="active-pill"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </a>
+            );
+          })}
+        </nav>
+
+        <div className="nav-controls">
+          <span className={`badge mode-${activeMode.toLowerCase()}`} title="Current Provenance Mode">
+            {activeMode}
+          </span>
+
+          <div
+            className={`status-indicator ${
+              !backendChecked ? "connecting" : backendReachable ? "online" : "offline"
+            }`}
+            title="Backend Connectivity Status"
+          >
+            <span className="status-dot" />
+            <span className="status-text">
+              {!backendChecked
+                ? "Connecting…"
+                : backendReachable
+                ? "Backend reachable"
+                : "Backend unavailable"}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            className="mobile-toggle"
+            onClick={() => setMobileOpen((prev) => !prev)}
+            aria-expanded={mobileOpen}
+            aria-label="Toggle navigation menu"
+          >
+            <span className={`hamburger-icon ${mobileOpen ? "open" : ""}`}>
+              <span />
+              <span />
+              <span />
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Navigation Drawer */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.nav
+            className="mobile-nav"
+            aria-label="Mobile Navigation"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+          >
+            {NAV_SECTIONS.map((sec) => (
+              <a
+                key={sec.id}
+                href={`#${sec.id}`}
+                className={`mobile-nav-link ${activeSection === sec.id ? "active" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollTo(sec.id);
+                }}
+              >
+                {sec.label}
+              </a>
+            ))}
+            <div className="mobile-nav-status">
+              <span className={`badge mode-${activeMode.toLowerCase()}`}>{activeMode}</span>
+              <span className="mobile-status-text">
+                {!backendChecked
+                  ? "Connecting to backend…"
+                  : backendReachable
+                  ? "Backend reachable"
+                  : "Backend unavailable"}
+              </span>
+            </div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+    </header>
+  );
+}
+
+// Footer Component
+function Footer() {
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer className="app-footer" role="contentinfo">
+      <div className="footer-content">
+        <div className="footer-brand">
+          <div className="footer-logo">
+            <span className="brand-mark footer-mark">N</span>
+            <strong>NetSentinel</strong>
+          </div>
+          <p className="footer-subtitle">Intelligent Network Monitoring &amp; Anomaly Detection</p>
+          <p className="footer-observation">Own-host observation · Local capture telemetry</p>
+        </div>
+
+        <div className="footer-meta">
+          <p className="footer-stack">
+            Next.js · Django · PostgreSQL · Isolation Forest
+          </p>
+          <p className="footer-disclaimer">
+            Anomalies indicate statistical deviation, not confirmed malicious activity.
+          </p>
+          <div className="footer-bottom">
+            <span>© {currentYear} NetSentinel. All rights reserved.</span>
+            <span>All timestamps shown in UTC · Missing observations never become zero</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
 
 function Panel({ id, title, detail, children }: { id?: string; title: string; detail?: string; children: ReactNode }) {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
-    <motion.section id={id} className="panel" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
+    <motion.section
+      id={id}
+      className="panel"
+      initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
+      whileHover={shouldReduceMotion ? undefined : { y: -2 }}
+    >
       <div className="panel-heading">
         <div>
           <h2>{title}</h2>
@@ -59,8 +315,14 @@ function RefreshError({ error, retained }: { error: string; retained: boolean })
 }
 
 function Metric({ title, value, detail }: { title: string; value: string; detail: string }) {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
-    <motion.section className="metric" whileHover={{ y: -2 }} transition={{ duration: 0.15 }}>
+    <motion.section
+      className="metric"
+      whileHover={shouldReduceMotion ? undefined : { y: -2 }}
+      transition={{ duration: 0.15 }}
+    >
       <p>{title}</p>
       <strong>{value}</strong>
       <small>{detail}</small>
@@ -70,6 +332,8 @@ function Metric({ title, value, detail }: { title: string; value: string; detail
 
 function CopyButton({ text, label = "Copy ID" }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+
   function handleCopy() {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       void navigator.clipboard.writeText(text);
@@ -77,16 +341,19 @@ function CopyButton({ text, label = "Copy ID" }: { text: string; label?: string 
       setTimeout(() => setCopied(false), 2000);
     }
   }
+
   return (
-    <button
+    <motion.button
       type="button"
       className={`copy-btn ${copied ? "copied" : ""}`}
       onClick={handleCopy}
       title={`Copy ${text}`}
       aria-label={copied ? "Copied!" : label}
+      whileHover={shouldReduceMotion ? undefined : { scale: 1.05 }}
+      whileTap={shouldReduceMotion ? undefined : { scale: 0.95 }}
     >
       {copied ? "Copied!" : label}
-    </button>
+    </motion.button>
   );
 }
 
@@ -95,6 +362,10 @@ export function Dashboard() {
   const [session, setSession] = useState("");
   const [mode, setMode] = useState<Mode>("LIVE");
   const [error, setError] = useState("");
+  const shouldReduceMotion = useReducedMotion();
+
+  const currentMode = selection?.mode ?? mode;
+  const globalHealth = useGlobalHealth();
 
   function connect(event: FormEvent) {
     event.preventDefault();
@@ -106,36 +377,25 @@ export function Dashboard() {
     setSelection({ session: session.trim().toLowerCase(), mode });
   }
 
+  const fadeInUp = {
+    initial: { opacity: 0, y: shouldReduceMotion ? 0 : 12 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: shouldReduceMotion ? 0 : -8 },
+    transition: { duration: shouldReduceMotion ? 0 : 0.25, ease: "easeOut" as const },
+  };
+
   return (
     <div className="shell">
-      <aside className="sidebar">
-        <a className="brand" href="#overview">
-          <span className="brand-mark">N</span>
-          NetSentinel
-        </a>
-        <p className="eyebrow">WORKSPACE / LOCAL</p>
-        <nav aria-label="Monitor sections">
-          <a href="#overview">Overview</a>
-          <a href="#anomaly">Anomaly detection</a>
-          <a href="#telemetry">Live telemetry</a>
-          <a href="#windows">Traffic windows</a>
-          <a href="#capture">Capture status</a>
-          <a href="#session">Session summary</a>
-        </nav>
-        <div className="sidebar-note">
-          <span className="dot" /> Observation only
-          <p>
-            This laptop · selected interface
-            <br />
-            No capture controls
-          </p>
-        </div>
-      </aside>
+      <Header
+        activeMode={currentMode}
+        backendReachable={globalHealth.reachable}
+        backendChecked={globalHealth.checked}
+      />
 
-      <main id="overview">
+      <main id="overview" className="main-content">
         <header className="page-heading">
           <div>
-            <p className="eyebrow">NETWORK MONITOR & ANOMALY EXPLAINABILITY</p>
+            <p className="eyebrow">NETWORK MONITOR &amp; ANOMALY EXPLAINABILITY</p>
             <h1>Your network, observed.</h1>
             <p>Measured traffic. Calibrated statistical baselines. One session at a time.</p>
           </div>
@@ -164,9 +424,13 @@ export function Dashboard() {
               ))}
             </select>
           </div>
-          <button type="submit">
+          <motion.button
+            type="submit"
+            whileHover={shouldReduceMotion ? undefined : { scale: 1.02 }}
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+          >
             View session <span aria-hidden="true">→</span>
-          </button>
+          </motion.button>
         </form>
         <p id="selection-help" className="help">
           Use the UUID returned by session registration. Selecting a mode does not start capture or generate traffic.
@@ -198,11 +462,9 @@ export function Dashboard() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        <footer>
-          NetSentinel · Own-host observation <span>All timestamps shown in UTC</span>
-        </footer>
       </main>
+
+      <Footer />
     </div>
   );
 }
@@ -218,6 +480,7 @@ function AnomalySection({
 }) {
   const latest = anomalies[0];
   const isAnomalous = latest?.label === "ANOMALOUS";
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <Panel
@@ -227,7 +490,9 @@ function AnomalySection({
     >
       {error && <RefreshError error={error} retained={!!anomalies.length} />}
       {!loaded ? (
-        <Notice>Loading anomaly results…</Notice>
+        <div className="skeleton-loader">
+          <Notice>Loading anomaly results…</Notice>
+        </div>
       ) : !anomalies.length ? (
         !error && (
           <Notice>
@@ -236,11 +501,21 @@ function AnomalySection({
         )
       ) : (
         <>
-          <div className="anomaly-hero">
+          <motion.div
+            className="anomaly-hero"
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
+          >
             <div className={`anomaly-status-card ${isAnomalous ? "status-anomalous" : "status-normal"}`}>
-              <span className={`badge ${isAnomalous ? "anomalous" : "normal"}`}>
+              <motion.span
+                className={`badge ${isAnomalous ? "anomalous" : "normal"}`}
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              >
                 {latest.label}
-              </span>
+              </motion.span>
               <div className="anomaly-score-display">
                 {latest.anomaly_score.toFixed(4)}
                 <small>
@@ -281,7 +556,7 @@ function AnomalySection({
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           <Notice className="disclaimer">
             {ANOMALY_DISCLAIMER}
@@ -354,7 +629,9 @@ function CapturePanel({
       {error ? (
         <RefreshError error={error} retained={!!status} />
       ) : !loaded ? (
-        <Notice>Loading capture status...</Notice>
+        <div className="skeleton-loader">
+          <Notice>Loading capture status...</Notice>
+        </div>
       ) : !status ? (
         <Notice>
           No recent capture status for this session and mode. Current state and gap information are unavailable.
@@ -431,7 +708,9 @@ function SessionPanel({
       {error ? (
         <RefreshError error={error} retained={!!session} />
       ) : !loaded ? (
-        <Notice>Loading session metadata...</Notice>
+        <div className="skeleton-loader">
+          <Notice>Loading session metadata...</Notice>
+        </div>
       ) : !session ? (
         <Notice>Session metadata unavailable.</Notice>
       ) : null}
@@ -563,7 +842,9 @@ function Monitor({ selection }: { selection: Selection }) {
       <Panel id="telemetry" title="Live telemetry" detail={`Last ${samples.length} returned samples · ${selection.mode} · OS_COUNTERS`}>
         {snapshot.telemetry.error && <RefreshError error={snapshot.telemetry.error} retained={!!samples.length} />}
         {!snapshot.loaded ? (
-          <Notice>Loading telemetry…</Notice>
+          <div className="skeleton-loader">
+            <Notice>Loading telemetry…</Notice>
+          </div>
         ) : !samples.length ? (
           !snapshot.telemetry.error && (
             <Notice>
@@ -611,7 +892,9 @@ function Monitor({ selection }: { selection: Selection }) {
       <Panel id="windows" title="Traffic windows" detail="Ten-second intervals · PACKET_METADATA · IP bytes include IP headers">
         {snapshot.windows.error && <RefreshError error={snapshot.windows.error} retained={!!windows.length} />}
         {!snapshot.loaded ? (
-          <Notice>Loading windows…</Notice>
+          <div className="skeleton-loader">
+            <Notice>Loading windows…</Notice>
+          </div>
         ) : !windows.length ? (
           !snapshot.windows.error && (
             <Notice>No recent windows for this session and mode. Missing windows are not zero traffic.</Notice>
