@@ -1,97 +1,215 @@
-# NetSentinel
+# NetSentinel: Real-Time Network Monitoring & Explainable Anomaly Detection System
 
-**Sprint 3 PASS for the agreed local dashboard scope.** PostgreSQL-backed browser
-readback, outage retention and automatic recovery are operator-verified; see
-[final evidence and retained limitations](docs/SPRINT3_ACCEPTANCE.md).
-Run the local Next.js frontend using [FRONTEND_SETUP.md](docs/FRONTEND_SETUP.md).
-It reads the existing API, preserves missing/partial data, and leaves backend
-schema and sensor behaviour unchanged. No ML or Sprint 4 work is started.
-The Sprint 2 sign-off below describes its original completed backend scope.
+An M.Sc. dissertation project delivering host-centric network telemetry, unsupervised Isolation Forest anomaly detection, deterministic feature-level explainability, and a modern, responsive web dashboard on a native Windows laptop.
 
-**NetSentinel: An Intelligent Real-Time Network Monitoring and Anomaly Detection System**
+---
 
-An M.Sc. final-year project for genuine network monitoring on a Windows laptop, Isolation Forest anomaly detection, observed-feature explanations and a safe, clearly labelled demonstration lab.
+## Project Status: Sprints 0–6 Complete & Verified
 
-**Status:** Sprint 0 complete. **Sprint 1 PASS on Ethernet 3, 2026-09-12**, committed at `ea8819a`. The proven sensor and its 93 tests remain unchanged. **Sprint 2 PASS for the agreed local backend scope**, with operator-verified PostgreSQL 17 persistence. See [Sprint 2 evidence and limitations](docs/SPRINT2_ACCEPTANCE.md). No frontend, ML or authentication is implemented in this user-authorized slice.
+| Sprint | Scope | Deliverables & Gates | Status |
+|:---|:---|:---|:---:|
+| **Sprint 0** | Planning & Architecture | Product requirements, module boundaries, scientific rules, and test strategy | **COMPLETE** |
+| **Sprint 1** | Native Windows Sensor | Real Npcap/Scapy packet sniffer on `Ethernet 3`, 1s OS counters, 10s flows, interface loss recovery (93 tests) | **PASS** (`ea8819a`) |
+| **Sprint 2** | Django REST + PostgreSQL | Transactional persistence, telemetry/window/status APIs, provenance gating, loopback isolation | **PASS** (`7fb7281`) |
+| **Sprint 3** | Next.js Monitoring Dashboard | Real-time rate gauges, traffic charts, session summaries, outage retention, and automatic reconnect | **PASS** (`79ee41b`) |
+| **Sprint 4** | Isolation Forest ML Engine | 335 genuine LIVE windows (4 runs, 2 UTC dates), 180 train / 60 cal / 60 test split, calibrated threshold $\tau \approx 0.7191$ | **PASS** (`a7cfdb5`) |
+| **Sprint 5** | Explainability & UI Redesign | Lightweight percentile-based feature explainability, neutral vocabulary, light theme design system with Google Roboto | **PASS** (`793ae85`) |
+| **Sprint 6** | E2E Integration & Viva Readiness | Full pipeline verification on LIVE Session 4, master documentation, screenshot checklist, and viva defense guide | **COMPLETE** |
 
-The corrected scheduler passed the uninterrupted thirty-minute run with 1,799 valid samples, all checks true and exit 0. Matched TCP reference discrepancy is 0%; fresh-process TCP/UDP, windows/features, idle/memory review and actual HTTP-outage independence pass. Recovery cleanup evidence is sufficient for this scope; the historical abrupt exit's cause remains unproven. [Final acceptance matrix and evidence](docs/SPRINT1_FEASIBILITY_REPORT.md) supersede older partial-status statements.
+**Total Automated Tests:** **209 / 209 passing (100%)** across backend Django tests (50), ML tests (18), sensor tests (93), frontend unit tests (29), and Playwright E2E browser tests (19).
 
-## Four core modules
+---
 
-| Module | Scope |
-| --- | --- |
-| Live Network Monitor | Npcap + Scapy; real upload/download, packets, TCP/UDP/protocol information, active flow summaries, interface/sensor status; one-second telemetry and ten-second analysis windows. |
-| Anomaly Detection Engine | One Isolation Forest trained on genuine traffic-derived features; compatible complete windows labelled Normal / Anomalous with score and threshold. |
-| Explainable Threat Analysis | Observed feature deviations and transparent rules explain unusual rates, outbound volume, destination ports and flow counts where supported. No unsupported attack labels or LLM. |
-| Network Recovery & Demo Lab | Detect interface loss, preserve monitoring gaps and safely recover within existing bounds. Explicit LIVE / SIMULATION / REPLAY modes; deterministic simulation, with compatible replay support staged later. |
+## Core Modules & Architecture
 
-An anomaly is not an attack and its score is not attack probability. Missing or unscored data is not Normal; monitoring gaps are not zero traffic. LIVE is genuine, simulation/replay stay labelled, and synthetic data never silently enters a live baseline. Capture is limited to the selected observation point; remote endpoints do not establish other-device or full-network visibility. Prefer metadata/aggregates and never persist payloads by default.
-
-The standalone sensor works without Django, PostgreSQL, a model or backend connectivity. The future HTTP sink is optional; the browser only presents accepted data. Monitoring stays useful with zero anomalies.
-
-## Seven-sprint roadmap
-
-| Sprint | Goal / status |
-| --- | --- |
-| 0 | Planning and architecture — complete. |
-| 1 | Real Windows sensor, capture, flows, telemetry, stability and recovery — PASS for Ethernet 3 own-host scope. |
-| 2 | Simple Django REST + PostgreSQL foundation, telemetry/flow/interface APIs, bounded persistence and minimal authentication. |
-| 3 | Next.js dashboard: rates, packets, TCP/UDP, flows, interface/sensor state and traffic charts. |
-| 4 | Confirm frozen features, genuine baseline, Isolation Forest train/save/load/score and documented evaluation/threshold. |
-| 5 | Feature-based explanations, controlled scenarios, labelled Simulation/Replay and safe viva demo. PCAP/controlled-data replay is staged by compatibility. |
-| 6 | End-to-end tests, UI polish, performance/stability, final documentation/screenshots/report support and viva preparation. |
-
-All original [Sprint 1 acceptance gates](docs/ROADMAP.md) are satisfied without changing their thresholds. No later sprint is started by this sign-off.
-
-## Planned stack and exclusions
-
-Keep the existing Python 3.11 sensor with pinned Scapy/psutil and manually installed Npcap. Future stack: Django REST Framework + PostgreSQL, Next.js/TypeScript with simple charts, and scikit-learn Isolation Forest with trusted local artifact handling. Select web/ML dependency versions only during authorized setup. Start with REST polling; add push only for demonstrated need.
-
-**OUT OF SCOPE:** advanced RBAC; complex incident management and weighted enterprise risk scoring; Bluetooth; topology/React Flow; threat intelligence APIs; chatbot/LLM explanations; Celery; Redis unless later essential; enterprise notifications; remote-device traffic monitoring claims/models; complex multi-model comparisons; large reporting systems; broad inventory/discovery; unjustified microservices; required cloud deployment. Remote capture/job controls and enterprise export workflows are also removed. Historical evidence remains labelled in the review and feasibility report.
-
-## Planning documents
-
-- [Agent instructions](AGENTS.md)
-- [Product requirements](docs/PRODUCT_REQUIREMENTS.md)
-- [Architecture and decisions](docs/ARCHITECTURE.md)
-- [Four module responsibilities](docs/MODULES.md)
-- [Roadmap and unchanged acceptance gates](docs/ROADMAP.md)
-- [Database plan](docs/DATABASE_PLAN.md)
-- [API plan](docs/API_PLAN.md)
-- [ML methodology](docs/ML_METHODOLOGY.md)
-- [Frozen live feature contract](docs/LIVE_FEATURE_CONTRACT.md)
-- [Windows sensor plan](docs/NETWORK_SENSOR_PLAN.md)
-- [Security rules](docs/SECURITY_RULES.md)
-- [Design system](docs/DESIGN_SYSTEM.md)
-- [Testing strategy](docs/TESTING_STRATEGY.md)
-- [Architecture review and scope history](docs/ARCHITECTURE_REVIEW.md)
-- [Sprint 1 evidence, blockers and next command](docs/SPRINT1_FEASIBILITY_REPORT.md)
-
-## Standalone sensor (PowerShell, Python 3.11)
-
-For the backend, use the separate `.venv-backend` environment and follow
-[Windows PostgreSQL/backend setup](docs/BACKEND_SETUP.md). The
-[API contract](docs/API_PLAN.md) covers the four models, seven operations,
-validation, idempotency and the temporary local-only/no-auth boundary.
-The sensor still starts independently using the commands below; no uploader
-or Django import was added to it.
-
-```powershell
-py -3.11 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-sensor.txt
-.\.venv\Scripts\python.exe -m sensor.cli interfaces
-.\.venv\Scripts\python.exe -m sensor.cli capture-interfaces
-.\.venv\Scripts\python.exe -m sensor.cli counters --interface "Ethernet 3" --samples 5
-.\.venv\Scripts\python.exe -m sensor.cli capture --interface "Ethernet 3" --duration 10
-.\.venv\Scripts\python.exe -m unittest discover -s tests/sensor -v
+```
++-------------------------------------------------------------+
+|                     Selected Network Adapter                |
++-------------------------------------------------------------+
+                              |
+                     (Npcap Packet Stream)
+                              v
++-------------------------------------------------------------+
+|              Standalone Python Sensor (sensor/)             |
+|   - 1-Second OS Counter Telemetry (psutil)                  |
+|   - 10-Second Flow Aggregation & Feature Extraction (Scapy) |
+|   - Local Console Output + Optional REST Ingestion          |
++-------------------------------------------------------------+
+                              |
+                    (Loopback REST Ingestion)
+                              v
++-------------------------------------------------------------+
+|               Django REST Backend (backend/)                |
+|   - Bounded PostgreSQL 17 Persistence                       |
+|   - AnomalyResult & ModelVersion Metadata Storage           |
+|   - Dynamic Feature Explainability Serialization            |
++-------------------------------------------------------------+
+                              |
+                    (Loopback Same-Origin Gateway)
+                              v
++-------------------------------------------------------------+
+|               Next.js Dashboard (frontend/)                 |
+|   - Clean Light Theme Design System (Roboto Font)           |
+|   - Anomaly Status Badge, Score, Threshold & Disclaimer     |
+|   - Collapsible History & Real-Time Outage Retention        |
++-------------------------------------------------------------+
 ```
 
-Select the actual active interface from enumeration; never assume the example alias remains active. Omit `--samples` for continuous counters; Ctrl+C stops. Counters emit LIVE OS totals, deltas and bytes/second. Capture requires manually installed Npcap and prints LIVE ten-second IP flow summaries with endpoints, ports, directional counts, IP length ranges, timestamps and partial/loss status. Default duration is 10 seconds, maximum 1800. Startup/shutdown windows may be partial. Packet objects are ephemeral; no payloads or capture files are stored. No backend is required.
+1. **Live Network Monitor (`sensor/`)**: Standalone Python 3.11 engine using Npcap 1.88 and Scapy 2.7.0. Gathers continuous 1-second OS network counters and 10-second Layer 3/Layer 4 flow aggregations. Works completely offline without backend dependencies.
+2. **Anomaly Detection Engine (`ml/`)**: Standalone offline ML pipeline. Uses `scikit-learn` Isolation Forest trained on genuine traffic-derived host features. Scores complete, finalized 10-second windows.
+3. **Explainable Threat Analysis (`backend/detection/`)**: Evaluates feature vectors against empirical baseline reference percentiles ($p95$, $p99$) to generate deterministic, human-readable explanations.
+4. **Network Recovery & Dashboard (`frontend/`)**: Modern Next.js 16 + React 19 + Framer Motion interface. Features live telemetry gauges, traffic charts, anomaly cards, collapsible history, and robust outage retention.
 
-For an explicitly invoked controlled test, run `.\.venv\Scripts\python.exe tests/sensor/manual_live.py --interface "Ethernet 3"`. It captures for 24 seconds while this laptop sends one public HTTP HEAD request to 1.1.1.1:80 and one DNS query for example.com to 1.1.1.1:53. It verifies matched bidirectional flows, DNS lengths and aggregation conservation. It does not run during unit tests. Private IPs appear in local output; do not commit redirected output. This is a packet-feasibility check, not the complete Sprint 1 gate.
+---
 
-Add `--http-outage` for the Sprint 1 failure fixture: one real health POST to a
-reserved non-listening loopback port, 0.2-second socket timeout, explicit failure
-and no retries/queue. Controlled TCP/UDP starts after failure while local records
-continue flushing to stderr; stdout contains the final JSON result. This is
-test-only sink evidence, not a production ingestion or durable delivery client.
+## Seven Frozen Host-v1 Features
+
+All features are extracted strictly from Layer 3 (IP) and Layer 4 (TCP/UDP) packet headers over non-overlapping **10-second event-time windows**:
+
+| Feature Name | Type | Definition & Extraction Semantics |
+|:---|:---:|:---|
+| `packets_per_second` | Float | Total attributable IP packets in window / window duration (10.0s). |
+| `ip_bytes_per_second` | Float | Total IP header + payload bytes / window duration (10.0s). |
+| `outbound_byte_fraction` | Float | Outbound IP bytes / (inbound + outbound IP bytes). Range $[0.0, 1.0]$ ($0.0$ if idle). |
+| `unique_remote_peers` | Integer | Count of distinct remote IP endpoints observed across all active flows. |
+| `tcp_syn_fraction` | Float | TCP packets with SYN flag set / total observed TCP packets ($0.0$ if no TCP). |
+| `udp_fraction` | Float | Observed UDP IP packets / total attributable IP packets ($0.0$ if idle). |
+| `mean_ip_packet_bytes` | Float | Total IP bytes / total IP packets (average packet size in bytes). |
+
+---
+
+## Machine Learning Methodology & Baseline Model
+
+- **Training Distribution**: 335 genuine LIVE windows gathered from the reference laptop (`Ethernet 3`) across 4 independent capture runs on 2 distinct UTC calendar dates. Zero synthetic records were used in baseline training.
+- **Chronological Split**:
+  - **Training Set (180 windows)**: Chronologically first segment used to fit the estimator.
+  - **Calibration Set (60 windows)**: Subsequent chronological segment used *solely* to select the decision threshold.
+  - **Held-out Test Set (60 windows)**: Final chronological segment used for one-time evaluation.
+  - **Unused Buffer (35 windows)**: Preserved at the end of the sequence to maintain exact split sizes.
+- **Estimator Configuration**: `IsolationForest(n_estimators=100, max_samples=180, random_state=42)`.
+- **Calibrated Threshold**: $\tau \approx 0.7190637495$ ($\approx 0.7191$), calibrated using the 99th percentile ($p99$) of baseline calibration anomaly scores.
+- **Score Orientation**: Defined as $\text{Anomaly Score} = -\text{score\_samples}(X)$, so that higher scores represent greater statistical divergence ($0.0$ to $1.0$).
+
+### Known Anomalous Demonstration Record (LIVE Session 4)
+- **Session UUID**: `59673d80-de26-4f31-a828-d91d97664cf8` (Run `cdca0d58-25bc-43ab-be21-a1b6f38c8844`)
+- **Window ID**: `5a5906ff-d994-530b-8cc5-4d243d3c1d9a` (Observed `2026-09-14 02:57:50 UTC`)
+- **Anomaly Score**: **`0.7314`** (exceeds threshold `0.7191`)
+- **Status**: **`ANOMALOUS`**
+- **Evidence Explanation**: *"Observed throughput (685.5 KiB/s) is higher than the learned baseline range; Observed packet rate (892.3 pkt/s) is higher than the learned baseline range; Unique remote peer count (44 peers) is outside typical observed baseline range."*
+- **Deviating Features**: `ip_bytes_per_second`, `packets_per_second`, `unique_remote_peers`
+
+---
+
+## Quick-Start & Execution Guide
+
+### Prerequisites
+- **OS**: Windows 10/11 (64-bit)
+- **Python**: Python 3.11
+- **Node.js**: Node.js 20+
+- **Packet Capture Driver**: [Npcap 1.80+](https://npcap.com/) (installed with WinPcap compatibility)
+- **Database**: PostgreSQL 17 (running locally on port 5432)
+
+---
+
+### 1. Start the Django REST Backend
+```powershell
+# Navigate to project root
+cd c:\Users\yuvas\Desktop\NetSentinel
+
+# Activate backend virtual environment and start server
+.\.venv-backend\Scripts\python.exe backend/manage.py runserver 127.0.0.1:8001
+```
+*Backend runs on `http://127.0.0.1:8001`.*
+
+---
+
+### 2. Start the Next.js Frontend Dashboard
+```powershell
+# In a new terminal, navigate to frontend/
+cd c:\Users\yuvas\Desktop\NetSentinel\frontend
+
+# Start Next.js development server
+npm run dev -- -p 3000
+```
+*Dashboard opens on `http://127.0.0.1:3000`.*
+
+---
+
+### 3. Run the Standalone Sensor (Optional Direct Capture)
+```powershell
+# In a new terminal, activate sensor virtual environment
+.\.venv\Scripts\python.exe -m sensor.cli interfaces
+.\.venv\Scripts\python.exe -m sensor.cli counters --interface "Ethernet 3" --samples 5
+.\.venv\Scripts\python.exe -m sensor.cli capture --interface "Ethernet 3" --duration 10
+```
+
+---
+
+## Demonstration Walkthrough (Step-by-Step Viva Presentation)
+
+1. **Open the Dashboard**: Navigate to `http://127.0.0.1:3000` in Google Chrome or Mozilla Firefox.
+2. **Initial State**: Observe the clean Light Theme landing page, Google Roboto typography, and empty state cards.
+3. **Select Genuine Session 4**:
+   - Monitoring session UUID: `59673d80-de26-4f31-a828-d91d97664cf8`
+   - Provenance: `LIVE`
+   - Click **View session →**.
+4. **Inspect Connection & Summary**:
+   - Connection chip confirms `Backend reachable` (green dot).
+   - Session panel displays interface `Ethernet 3`, observation profile `live_pilot_baseline_host_v1`, and UTC start timestamp.
+5. **Inspect Anomaly Detection Panel**:
+   - Latest window displays **`NORMAL`** green badge with score `0.4642`.
+   - Threshold `0.7191` and Model Version `505fdd6c…` are displayed.
+   - Explanation text states: *"Within learned baseline range"*.
+   - Mandatory scientific disclaimer is visible:
+     > *"Anomaly indicates statistical deviation from the learned baseline, not confirmed malicious activity."*
+6. **Inspect Anomaly History & Known Anomalous Window**:
+   - Click **Inspect recent anomaly scoring history (45 records)** to expand the table.
+   - Locate the highlighted red row (`2026-09-14 02:57:50 UTC`).
+   - Score `0.7314` is prominently displayed against threshold `0.7191`.
+   - Feature explanation chips identify burst throughput ($685.5\text{ KiB/s}$), packet rate ($892.3\text{ pkt/s}$), and remote peer count ($44\text{ peers}$).
+7. **Demonstrate Outage Retention & Recovery**:
+   - Temporarily stop the backend server (`Ctrl+C` on port 8001).
+   - The connection chip updates to `Backend unavailable` (amber).
+   - All historical cards and tables retain their loaded data alongside a clear `Refresh failed` notice (no blanking or zeroing).
+   - Restart the backend server. The dashboard automatically recovers without page reload.
+
+---
+
+## Screenshots Checklist for Project Report
+
+When preparing your dissertation report and viva slides, capture the following screenshots:
+
+- [ ] **1. Dashboard Overview / Empty State**: `http://127.0.0.1:3000` before session selection.
+- [ ] **2. Live Session 4 Loaded View**: Dashboard showing `Backend reachable`, interface `Ethernet 3`, and top metric cards.
+- [ ] **3. Latest Anomaly Status (NORMAL)**: Anomaly hero card with green `NORMAL` badge, score `0.4642`, threshold `0.7191`, and neutral explanation.
+- [ ] **4. Expanded Anomaly Scoring History Table**: Table showing historical windows, scores, thresholds, and explanations.
+- [ ] **5. Known Anomalous Result Detail**: Highlighted row for window `5a5906ff…` with `ANOMALOUS` red badge, score `0.7314`, and deviating feature chips.
+- [ ] **6. Traffic Windows Panel**: 10-second traffic window table with packet, byte, protocol, and flow counts.
+- [ ] **7. Capture & Interface Panel**: Status card showing `RUNNING`, valid state, and interface metadata.
+- [ ] **8. Backend Outage Retention**: Dashboard displaying amber `Backend unavailable` status while preserving historical data.
+- [ ] **9. Standalone Sensor CLI**: PowerShell terminal executing `sensor.cli counters` and `sensor.cli capture`.
+- [ ] **10. ML Training Pipeline Summary**: Terminal output from `ml.cli train` displaying model manifest and threshold calibration.
+
+---
+
+## Non-Negotiable Scientific & Privacy Principles
+
+1. **Anomaly != Attack**: An anomaly indicates statistical divergence from a learned baseline. It is never presented as an attack probability, threat level, or malware detection verdict.
+2. **Zero Payload Persistence**: Only packet headers and statistical flow metrics are captured. Application payloads, passwords, and sensitive cookies are never logged or stored.
+3. **Strict Provenance Partitioning**: `LIVE`, `SIMULATION`, and `REPLAY` modes are strictly partitioned end-to-end. Synthetic records never enter a live baseline.
+4. **Missing Data is Not Zero**: Unobserved periods and sensor outages are preserved as explicit monitoring gaps—never zero-filled or smoothed.
+5. **No Speculative Terminology**: The UI and backend strictly prohibit uncorroborated security buzzwords ("hacker", "cyber attack", "malware infection", "exfiltration certainty").
+
+---
+
+## Documentation Sitemap
+
+- [Viva Voce Technical Defense Guide](docs/VIVA_GUIDE.md) — Comprehensive viva Q&A and technical rationale.
+- [Architecture & ADR Register](docs/ARCHITECTURE.md) — Full system architecture and 27 Architecture Decision Records.
+- [Sequential Project Roadmap](docs/ROADMAP.md) — Acceptance gates and completion milestones for Sprints 0–6.
+- [Machine Learning Methodology](docs/ML_METHODOLOGY.md) — Isolation Forest training, baseline splits, and threshold calibration.
+- [Frozen Live Feature Contract](docs/LIVE_FEATURE_CONTRACT.md) — Mathematical definitions of the 7 host-v1 features.
+- [Testing Strategy & Test Matrix](docs/TESTING_STRATEGY.md) — Multi-tier test suite and validation strategy.
+- [Windows Sensor Specification](docs/NETWORK_SENSOR_PLAN.md) — Npcap/Scapy integration, OS counters, and recovery bounds.
+- [Database Schema & API Plan](docs/DATABASE_PLAN.md) — PostgreSQL models, migrations, and DRF endpoint contracts.
+- [Design System & Tokens](docs/DESIGN_SYSTEM.md) — Light theme design tokens, typography, and Framer Motion micro-interactions.

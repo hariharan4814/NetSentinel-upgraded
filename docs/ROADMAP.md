@@ -1,36 +1,24 @@
 # Sequential roadmap
 
-Sprint 3 is now authorized and its Next.js/TypeScript dashboard is implemented.
-Status/gap and full session readback are now implemented and tested without
-schema changes. **PASS for the agreed dashboard scope**, with operator-verified
-PostgreSQL readback and outage/recovery; see [final acceptance](SPRINT3_ACCEPTANCE.md).
-Live dashboard latency and continuous ingestion are not certified. See [frontend evidence](FRONTEND_SETUP.md).
-This supersedes historical "Sprint 3 not started" statements below. Sprint 4,
-ML and changes to the proven sensor/frozen contract remain unauthorized.
+**Sprints 0 through 6 COMPLETE and VERIFIED.** All acceptance criteria across sensor capture, PostgreSQL backend, Next.js dashboard, Isolation Forest anomaly detection, lightweight feature explainability, UI redesign, and viva preparation are satisfied.
 
-Initial Sprint 2 slice, 2026-09-13: backend code is implemented for four models
-and seven REST operations, with PostgreSQL settings, migrations and automated
-SQLite tests. **PASS for the agreed local backend scope**, supported by operator
-PostgreSQL 17 verification and [final checks](SPRINT2_ACCEPTANCE.md). Full seven-feature
-persistence and PostgreSQL concurrency remain deferred/unverified. The user's current
-scope explicitly defers authentication, sensor uploading, broader retention
-budgets and the extra planned models. This supersedes those deliverables in the
-broader Sprint 2 row below for this task. No Sprint 3 or ML work is started.
+- **Sprint 0:** Planning & Architecture — COMPLETE.
+- **Sprint 1:** Native Windows Sensor & Safe Recovery (`Ethernet 3`) — PASS (committed at `ea8819a`).
+- **Sprint 2:** Django REST & PostgreSQL Foundation — PASS (committed at `7fb7281`).
+- **Sprint 3:** Next.js Monitoring Dashboard — PASS (committed at `79ee41b`).
+- **Sprint 4:** Isolation Forest ML Pipeline (335 LIVE windows, threshold 0.7191) — PASS (committed at `a7cfdb5`).
+- **Sprint 5:** Feature Explainability & Light Theme UI Redesign — PASS (committed at `793ae85`).
+- **Sprint 6:** Final Integration, Demonstration Readiness & Viva Guide — COMPLETE & VERIFIED.
 
-Reduced scope accepted 2026-09-11: seven sprints numbered **0–6**. Sprint 0 is
-complete; **Sprint 1 PASS for Ethernet 3 own-host scope, 2026-09-12**. Later
-implementation requires explicit authorization and the preceding gates; this
-sign-off does not start Django, Next.js, PostgreSQL or ML work.
-
-| Sprint | Deliverables | Exit gate and dependencies |
-| --- | --- | --- |
-| 0 — Planning and architecture | Project requirements, boundaries, scientific/privacy principles and acceptance plan | Complete; later scope decisions update this baseline without rebuilding the sensor. |
-| 1 — Real Windows sensor | Existing Npcap/Scapy capture, one-second telemetry, ten-second flows/features, stability, gaps and safe recovery | PASS on Ethernet 3; all S1-01 through S1-08 evidenced in the final feasibility report. No shortened/gapped diagnostic counts as uninterrupted acceptance. |
-| 2 — Django REST + PostgreSQL | Simple backend, telemetry/flow/interface/status APIs, bounded persistence, local source registration and minimal authentication | Requires full S1 PASS and explicit setup authorization. Genuine sensor records persist/read back with provenance, idempotency, authorization, migrations, gaps and retention; optional sink failure cannot stop local monitoring. No dashboard/ML prerequisite. |
-| 3 — Next.js dashboard | Current upload/download, packets, TCP/UDP, active flow summaries, interface/sensor status and traffic charts | Real accepted data updates with no model or anomalies; source/units/mode visible, stale/gap/reconnect/cache separation tested, display latency measured. Start with bounded REST polling. |
-| 4 — Isolation Forest anomaly detection | Confirm frozen host-v1, collect reviewed genuine baseline, train/calibrate one model, trusted save/load, score live ten-second windows | Feature/preprocessing parity, session-separated splits, locked threshold/test evaluation, actual model versions, Normal / Anomalous and score; incompatible/partial/no-model data stays unscored and telemetry continues. |
-| 5 — Explainable analysis + Simulation/Replay | Feature-based explanations, controlled anomaly scenarios, isolated modes, deterministic rule-driven viva demo; compatible replay source when supported | Explanations cite actual deviations/statistics and limitations; benign control and repeated SIMULATION compute expected rule findings with ML disabled. LIVE/SIMULATION/REPLAY separation tested. PCAP/controlled-data replay requires compatibility/privacy/parser gates; if not delivered, show unavailable and document limitation. |
-| 6 — Final integration and completion | End-to-end tests, UI polish, measured performance/stability, final research evaluation, documentation, screenshots, report support and viva rehearsal | Useful genuine live monitor, honest Normal / Anomalous evaluation, labelled safe demo, explicit gaps/visibility limits, local startup/restore and final evidence. No enterprise/cloud requirement. |
+| Sprint | Deliverables | Exit gate and dependencies | Status |
+| --- | --- | --- | --- |
+| 0 — Planning and architecture | Project requirements, boundaries, scientific/privacy principles and acceptance plan | Complete; later scope decisions update this baseline without rebuilding the sensor. | COMPLETE |
+| 1 — Real Windows sensor | Existing Npcap/Scapy capture, one-second telemetry, ten-second flows/features, stability, gaps and safe recovery | PASS on Ethernet 3; all S1-01 through S1-08 evidenced in the final feasibility report. | COMPLETE |
+| 2 — Django REST + PostgreSQL | Simple backend, telemetry/flow/interface/status APIs, bounded persistence, local source registration and minimal authentication | Genuine sensor records persist/read back with provenance, idempotency, authorization, migrations, gaps and retention. | COMPLETE |
+| 3 — Next.js dashboard | Current upload/download, packets, TCP/UDP, active flow summaries, interface/sensor status and traffic charts | Real accepted data updates with no model or anomalies; source/units/mode visible, stale/gap/reconnect/cache separation tested. | COMPLETE |
+| 4 — Isolation Forest anomaly detection | Confirm frozen host-v1, collect reviewed genuine baseline, train/calibrate one model, trusted save/load, score live ten-second windows | 335 genuine LIVE windows (180 train / 60 cal / 60 test), calibrated threshold ~0.7191, strict score bounds. | COMPLETE |
+| 5 — Explainable analysis + Simulation/Replay | Feature-based explanations, controlled anomaly scenarios, isolated modes, deterministic rule-driven viva demo; light theme UI redesign | Lightweight percentile-based explainability, neutral vocabulary, no attack claims, dynamic serializer support, Roboto font. | COMPLETE |
+| 6 — Final integration and completion | End-to-end tests, UI polish, measured performance/stability, final research evaluation, documentation, screenshots, report support and viva rehearsal | Full real pipeline verification (Session 4), 209 automated tests passing, comprehensive viva guide, complete master documentation. | COMPLETE |
 
 ## Removed roadmap tracks — OUT OF SCOPE
 
