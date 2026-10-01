@@ -37,7 +37,7 @@ test("renders sticky top header navigation and footer without sidebar", async ({
   await page.route("**/api/backend/**", (route) =>
     mockReply(route, { json: route.request().url().includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } })
   );
-  await page.goto("/");
+  await page.goto("/local");
 
   // 1. Verify Top Header is present and sticky
   const header = page.locator("header.top-nav");
@@ -76,7 +76,7 @@ test("mobile responsive header opens hamburger menu and closes on selection", as
     mockReply(route, { json: route.request().url().includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } })
   );
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await page.goto("/local");
 
   // Verify desktop nav is hidden and hamburger button is visible
   await expect(page.locator(".desktop-nav")).not.toBeVisible();
@@ -98,7 +98,7 @@ test("empty states, local navigation and mobile layout", async ({ page }, testIn
   await page.route("**/api/backend/**", (route) =>
     mockReply(route, { json: route.request().url().includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } })
   );
-  await page.goto("/");
+  await page.goto("/local");
   await expect(page.getByText("Ready when your data is.")).toBeVisible();
   await select(page);
   await expect(page.getByText("No recent telemetry for this session", { exact: false })).toBeVisible();
@@ -119,7 +119,7 @@ test("loading state is visible until API replies", async ({ page }) => {
     await pending;
     await mockReply(route, { json: route.request().url().includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } });
   });
-  await page.goto("/");
+  await page.goto("/local");
   await select(page);
   await expect(page.getByText("Loading telemetry…", { exact: true })).toBeVisible();
   release();
@@ -136,7 +136,7 @@ test("previous mode requests cannot repopulate the new selection", async ({ page
     if (old) await pending;
     await mockReply(route, { json: route.request().url().includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } }).catch(() => {});
   });
-  await page.goto("/");
+  await page.goto("/local");
   await select(page);
   await expect(page.getByText("Loading telemetry…", { exact: true })).toBeVisible();
   await select(page, "REPLAY");
@@ -154,7 +154,7 @@ test("measured zero, partial windows and mode switching without old data", async
     const window = { ...identity, start: new Date(Date.now() - 10000).toISOString(), end: new Date().toISOString(), valid: false, partial: true, reason: "fixture_missing_coverage", packets: 0, ip_bytes: 0, tcp_packets: 0, udp_packets: 0, flow_count: 0 };
     return mockReply(route, { json: url.pathname.endsWith("health") ? { status: "ok", database: "reachable" } : { next: null, results: url.searchParams.get("mode") !== "SIMULATION" ? [] : [url.pathname.endsWith("telemetry") ? sample : window] } });
   });
-  await page.goto("/");
+  await page.goto("/local");
   await select(page);
   await expect(page.getByText("1.00 KiB/s", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("0.0 B/s", { exact: true }).first()).toBeVisible();
@@ -166,7 +166,7 @@ test("measured zero, partial windows and mode switching without old data", async
 
 test("backend errors never become zero rates", async ({ page }) => {
   await page.route("**/api/backend/**", (route) => mockReply(route, { status: 503, json: { error: "Backend unavailable or request timed out." } }));
-  await page.goto("/");
+  await page.goto("/local");
   await select(page);
   await expect(page.getByText("Backend unavailable", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("0.0 B/s", { exact: true })).toHaveCount(0);
@@ -202,7 +202,7 @@ test("stale and invalid observations keep rates unavailable", async ({ page }) =
           },
     });
   });
-  await page.goto("/");
+  await page.goto("/local");
   await select(page);
   await expect(page.getByText("Invalid observation", { exact: true })).toBeVisible();
   await expect(page.locator(".metric").first()).toContainText("Unavailable");
@@ -234,7 +234,7 @@ test("renders anomaly detection section with evidence-based explanation and disc
     return mockReply(route, { json: url.includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } });
   });
 
-  await page.goto("/");
+  await page.goto("/local");
   await select(page);
 
   // 1. Verify Anomaly section is rendered
@@ -292,7 +292,7 @@ for (const state of ["RUNNING", "INTERFACE_LOST", "RECOVERING", "STOPPED"]) {
       }
       return mockReply(route, { json: route.request().url().includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } });
     });
-    await page.goto("/");
+    await page.goto("/local");
     await select(page);
     await expect(page.locator("#capture")).toContainText(state);
     await expect(page.locator("#capture")).toContainText(state === "RUNNING" ? "0 s" : "12.5 s");
@@ -335,7 +335,7 @@ test("stale status and unknown session remain explicit", async ({ page }) => {
     }
     return mockReply(route, { json: route.request().url().includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } });
   });
-  await page.goto("/");
+  await page.goto("/local");
   await select(page);
   await expect(page.locator("#capture")).toContainText("Stale report");
   await expect(page.locator("#capture")).toContainText("current state unavailable");
@@ -388,7 +388,7 @@ test("a newer loss event suppresses current rates without altering historical sa
     }
     return mockReply(route, { json: route.request().url().includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } });
   });
-  await page.goto("/");
+  await page.goto("/local");
   await select(page);
   await expect(page.locator("#capture")).toContainText("INTERFACE_LOST");
   await page.getByText("Inspect returned samples (1)").click();
@@ -400,7 +400,7 @@ test("supports prefers-reduced-motion", async ({ page }) => {
   await page.route("**/api/backend/**", (route) =>
     mockReply(route, { json: route.request().url().includes("health") ? { status: "ok", database: "reachable" } : { next: null, results: [] } })
   );
-  await page.goto("/");
+  await page.goto("/local");
   await select(page);
   await expect(page.locator("#anomaly")).toBeVisible();
 });

@@ -1,5 +1,14 @@
 # Design system
 
+## Current public design — 2026-10-01
+
+The public connection helper follows ../designplan.md: vanilla CSS, deep teal
+sidebar, translucent cool-white surfaces, system fonts, responsive navigation,
+real measurement states and accessible text alternatives for charts. No external
+font request, UI library or decorative fake telemetry is introduced. The original
+technical stylesheet stays with `/local`. Earlier tokens/plans below are historical
+and do not override the public design plan.
+
 Sprint 3 implementation uses the dark tokens below with responsive plain CSS,
 system fonts and accessible HTML tables. One page has five monitor sections;
 no future ML navigation is scaffolded. Charts show separate measured points,

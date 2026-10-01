@@ -1,5 +1,20 @@
 # Security rules
 
+## Public distribution boundary — 2026-10-01
+
+ADR-028 authorizes a public static connection helper. Only the allowlisted export
+in `public-release/dist` can be published. It contains no Django relay, `/local`,
+capture controls, .env, private source records or model artifacts. The public app
+fetches only a fixed same-origin asset, omits credentials, bypasses browser cache,
+rejects redirects/unexpected responses and limits attempts/timeouts. There is no
+arbitrary URL input, scanning, remote probe service or privileged browser API.
+
+Saved checks are opt-in, bounded and validated, stay in browser storage and can
+be erased. Export includes observations/method/scope but no IPs or browsing data.
+The hosting provider may receive ordinary HTTP metadata; the UI discloses this.
+No analytics, third-party fonts, trackers or account system is introduced.
+Existing local API restrictions remain mandatory; they are not cloud auth.
+
 ## Sprint 3 local dashboard boundary
 
 Guard correction: NextRequest normalizes loopback URLs to localhost. Validate

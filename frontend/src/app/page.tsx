@@ -1,5 +1,5 @@
-import { Dashboard } from "@/components/dashboard";
+import { ConnectionApp } from "@/components/public/connection-app";
 
 export default function Page() {
-  return <Dashboard />;
+  return <ConnectionApp />;
 }

@@ -1,5 +1,16 @@
 # Testing strategy
 
+## Public utility upgrade — 2026-10-01
+
+Consequential checks cover missing versus zero measurements, HTTP failure and
+unexpected-body handling, exact request bounds, cancellation, local scope,
+threshold edges, history validation/retention and unit arithmetic. Browser tests
+exercise actual local requests, cancellation, opt-in history/reload/deletion,
+report download, mobile troubleshooting, calculator errors and the guide. Existing
+private-dashboard browser tests target `/local` and remain regression coverage.
+Check the production build, public export route allowlist and desktop/mobile UI.
+Actual results belong in PUBLIC_RELEASE.md, not in historical totals below.
+
 ## Final Sprint 3 sign-off
 
 **PASS for the agreed local dashboard scope.** Operator-verified PostgreSQL

@@ -14,7 +14,7 @@ test.afterAll(async () => { await new Promise<void>((resolve, reject) => upstrea
 
 // Deliberately do not intercept /api/backend: exercise the real Next route boundary.
 test("real browser GET without Origin reaches the server route allowlist", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/local");
   const requestPromise = page.waitForRequest("**/api/backend/not-allowed");
   const result = await page.evaluate(async () => {
     const response = await fetch("/api/backend/not-allowed");

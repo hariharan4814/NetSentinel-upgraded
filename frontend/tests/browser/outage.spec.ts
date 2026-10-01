@@ -24,7 +24,7 @@ for (const historical of [false, true]) {
       if (path.endsWith("anomaly-results")) json = { next: null, results: [] };
       return route.fulfill({ json });
     });
-    await page.goto("/");
+    await page.goto("/local");
     await page.getByLabel("Monitoring session UUID").fill(session);
     await page.getByLabel("Provenance").selectOption("SIMULATION");
     await page.getByRole("button", { name: "View session" }).click();

@@ -1,4 +1,54 @@
-# NetSentinel: Real-Time Network Monitoring & Explainable Anomaly Detection System
+# NetSentinel — make sense of your connection
+
+NetSentinel now has a public-facing connection helper for everyday people:
+run a small browser check, understand the result, follow practical troubleshooting
+steps, and save a report for support. No account, Python, database or capture
+driver is needed for this public experience.
+
+**[Open NetSentinel](https://netsentinel-connect.hariharan4814.chatgpt.site)** —
+public deployment confirmed on 2026-10-01.
+
+## What you can do
+
+- Run/cancel eight HTTP checks to this website; see actual response times and
+  failed requests. This is not a speed test or packet-loss measurement.
+- Follow steps for slow browsing, frozen calls, disconnections or a failing site.
+- Optionally keep 10 recent checks for 7 days in this browser, compare them and
+  delete them. History is off by default.
+- Download a plain-text check summary with its method, source and limitations.
+- Estimate a file's download time from a speed you enter.
+- Read the in-app **How it works** section for usage, privacy and limitations.
+
+## Start the upgraded app locally
+
+```powershell
+cd C:\Users\yuvas\Desktop\NetSentinel\frontend
+npm ci
+npm run build
+npm run start
+```
+
+Open `http://127.0.0.1:3000`. The new homepage works without Django. Local check
+results are labelled LOCAL because a response from your computer does not test
+the internet. The original technical monitor is preserved at `/local`; its
+existing backend and sensor requirements still apply. Use Node 22+ (Node 24.19.0
+was used in this upgrade). Remote font downloads were removed.
+
+The public distribution is an allowlisted static export, built with
+`npm run build:public`, into `public-release/dist`. It does **not** include the
+local API, sensor, database or `/local`. Never publish the whole repository or
+the ordinary local Next server as a substitute. See [public release guide](docs/PUBLIC_RELEASE.md).
+
+Detailed analysis and implementation sequence: [plan.md](plan.md).
+Visual direction and vanilla CSS specification: [designplan.md](designplan.md).
+
+## Historical research implementation
+
+The material below documents the earlier academic product and its recorded
+evidence. Its test totals and capability claims are historical, not fresh
+verification of this upgrade. ADR-028 defines the new public boundary.
+
+# Local network monitoring & explainable anomaly detection
 
 An M.Sc. dissertation project delivering host-centric network telemetry, unsupervised Isolation Forest anomaly detection, deterministic feature-level explainability, and a modern, responsive web dashboard on a native Windows laptop.
 

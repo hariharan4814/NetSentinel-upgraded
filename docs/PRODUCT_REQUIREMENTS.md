@@ -1,5 +1,18 @@
 # Product requirements
 
+## Current public product — 2026-10-01
+
+User-authorized pivot: serve everyday people with slow or unreliable internet.
+The implemented public MVP provides a bounded HTTP response check, symptom-led
+troubleshooting, optional local history/comparison/deletion, report download,
+manual-speed download planner and a how-to/privacy guide. Acceptance and limits
+are in ../plan.md and PUBLIC_RELEASE.md. It works without a sensor/backend/model.
+No whole-network health, speed-test or security claim is made.
+
+The original monitor remains a local advanced tool at `/local`. All requirements
+below apply to that historical research pipeline unless superseded by ADR-028.
+The public build contains none of the private monitoring routes or data.
+
 **NetSentinel: An Intelligent Real-Time Network Monitoring and Anomaly Detection System**
 
 Reduced final-project scope accepted 2026-09-11. Sprint 0 planning is complete.

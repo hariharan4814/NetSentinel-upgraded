@@ -1,5 +1,15 @@
 # Module responsibilities
 
+## Public utility ownership — 2026-10-01
+
+`frontend/src/components/public/` owns the new consumer workspace and its small
+line icons. `connection-check.ts` owns measurement, summarization, history
+validation, estimates and report formatting. `troubleshooting.ts` owns guided
+content. `public.css` owns vanilla CSS glass surfaces and responsive layouts.
+No sensor, Django or model imports cross this boundary. The original dashboard
+moves to `/local` without changing its contracts. `scripts/build-public.mjs`
+exports only explicitly listed public files; see ADR-028.
+
 Sprint 3 adds `frontend/` for presentation and a bounded GET relay only.
 It imports neither sensor nor Django code. No Django apps, models or endpoints
 change in the initial frontend work. The continuation extends two existing GET

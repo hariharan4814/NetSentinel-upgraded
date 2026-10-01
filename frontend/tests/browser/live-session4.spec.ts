@@ -1,8 +1,9 @@
 import { test, expect } from "@playwright/test";
 
 test("live integration with Session 4 against running backend", async ({ page }) => {
+  test.skip(process.env.NETSENTINEL_LIVE_SMOKE !== "1", "Opt-in: requires the operator’s existing local server and private Session 4 data.");
   // Directly hit the live server without page.route mocks
-  await page.goto("http://127.0.0.1:3000");
+  await page.goto("http://127.0.0.1:3000/local");
 
   await page.getByLabel("Monitoring session UUID").fill("59673d80-de26-4f31-a828-d91d97664cf8");
   await page.getByLabel("Provenance").selectOption("LIVE");

@@ -1,5 +1,36 @@
 # Architecture
 
+## ADR-028 — public connection helper and separate static distribution
+
+**Accepted, 2026-10-01, under the user's explicit upgrade/public-launch request.**
+The user selected everyday internet troubleshooting as the primary audience.
+Reason: the existing academic dashboard requires private local telemetry and
+technical identifiers, so it cannot serve an anonymous visitor usefully or safely.
+
+Consequences: `/` is a public browser utility; `/local` retains the original
+dashboard in the local Next application. A source allowlist produces a separate
+static export containing neither the local route nor its backend gateway.
+Public hosting receives only that export, never the root checkout or local env.
+Native Windows capture, Django, PostgreSQL, ML and host-v1 contracts are unchanged.
+
+Public checks use eight bounded same-origin fetches with cancellation and verified
+JSON responses. Results retain browser-http-v1, timestamps and LIVE/LOCAL scope.
+Browser LIVE HTTP timings are not sensor telemetry, packet loss, speed measurements
+or model scores. Proposed advisory thresholds (300 ms median / 150 ms range)
+are labelled heuristics. Hidden-tab checks cancel rather than recording scheduler
+delay as network degradation. One check runs at a time; no URL input or proxy.
+
+History is opt-in, browser-local, validated, capped at 10 records/7 days and
+deletable. No telemetry, account, capture-control, ingestion or model endpoint
+is exposed by the public distribution. The local unauthenticated stack retains
+all loopback restrictions. Future cloud ingestion would need a separate identity,
+authorization and privacy design; this public utility does not imply that work.
+
+This decision supersedes earlier academic-only/cloud-excluded presentation plans
+for this public slice. It does not supersede any scientific, capture-authorization
+or privacy requirement. See ../plan.md and PUBLIC_RELEASE.md for implementation
+and actual validation; historical evidence below is preserved.
+
 Sprint 4 ML and detection implementation: offline dataset export/validation/training/scoring pipeline and backend model metadata + anomaly result storage.
 **Sprint 4 PASS**: all frozen host-v1 feature validations, manifest checks, migrations, offline pipeline commands, API serializers, views and tests are implemented and passing.
 Real LIVE model training is deferred pending collection of genuine multi-session live traffic; synthetic training data is strictly prohibited.

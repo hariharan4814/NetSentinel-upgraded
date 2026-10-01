@@ -38,6 +38,8 @@ coverage/
 playwright-report/
 test-results/
 npm-debug.log*
+.public-build/
+public-release/
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*

@@ -1,5 +1,19 @@
 # API and event plan
 
+## Public browser utility — 2026-10-01
+
+Public `GET /connection-check.json?check=<random-id>` serves fixed
+`{"service":"netsentinel-connectivity","version":1}`. No user content is
+stored or echoed. Browser requests use no-store, omit credentials, reject
+redirects and time out after 3 seconds. A run has exactly eight attempts unless
+cancelled. The request URL is fixed; this is not a proxy or a speed-test endpoint.
+Hosting sets no-store for this asset; real HTTP times include server/browser
+overhead and are scoped only to this website.
+
+The public static build has no `/api/backend/*` or `/local`. The unchanged local
+gateway and sensor API documented below remain available only in the local
+Next/Django stack. Public history and reports are computed in the browser.
+
 Sprint 3 is **PASS for the agreed local dashboard integration scope** with the
 GET contracts below unchanged. [Final evidence](SPRINT3_ACCEPTANCE.md) records
 operator PostgreSQL/browser readback and outage/recovery, plus retained limits.

@@ -1,5 +1,13 @@
 # Sequential roadmap
 
+## Current authorized upgrade — 2026-10-01
+
+The user explicitly authorized implementation and public launch for everyday
+internet troubleshooting. The public-product phases and acceptance gates are in
+../plan.md; ADR-028 separates the public static helper from the private local
+monitor. PUBLIC_RELEASE.md records actual verification and publication status.
+The sprint completion records below describe the previous academic scope.
+
 **Sprints 0 through 6 COMPLETE and VERIFIED.** All acceptance criteria across sensor capture, PostgreSQL backend, Next.js dashboard, Isolation Forest anomaly detection, lightweight feature explainability, UI redesign, and viva preparation are satisfied.
 
 - **Sprint 0:** Planning & Architecture — COMPLETE.

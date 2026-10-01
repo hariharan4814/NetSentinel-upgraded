@@ -1,25 +1,17 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
-import "./globals.css";
-
-const roboto = Roboto({
-  weight: ["300", "400", "500", "700"],
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-roboto",
-});
+import "./public.css";
 
 export const metadata: Metadata = {
-  title: "NetSentinel · Network Monitor",
-  description: "Local network telemetry and anomaly explainability dashboard",
+  title: "NetSentinel · Make sense of your connection",
+  description: "Check your connection, work through simple internet fixes, and save useful results. No account or installation needed.",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={roboto.variable}>
-      <body className={roboto.className}>{children}</body>
+    <html lang="en">
+      <body>{children}</body>
     </html>
   );
 }

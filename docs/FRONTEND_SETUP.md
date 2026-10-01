@@ -1,5 +1,11 @@
 # Sprint 3 dashboard (Windows / PowerShell)
 
+**Current entry points (2026-10-01):** `/` now serves the public connection helper
+and needs no backend. The original monitoring dashboard described below is at
+`/local`; use `http://127.0.0.1:3000/local` for its UUID/mode workflow. The
+public-only export excludes `/local` and all API routes. See [release guide](PUBLIC_RELEASE.md)
+and ADR-028. Remote Google font loading was removed in favor of system fonts.
+
 Gateway smoke-test fix: [NextRequest Host normalization](SPRINT3_GATEWAY_FIX.md).
 Local browser GETs may omit Origin/Referer. Supplied values are checked against
 the validated wire Host, not Next's normalized localhost URL. Gateway-fix regression
