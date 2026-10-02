@@ -1,9 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, fixtureReadToken } from "./local-fixture";
 import { createServer } from "node:http";
 
 // An isolated loopback upstream, not Django or stored LIVE telemetry.
 const upstream = createServer((req, res) => {
-  if (req.url !== "/api/v1/health/" || req.method !== "GET" || req.headers.origin || req.headers.cookie) {
+  if (req.url !== "/api/v1/health/" || req.method !== "GET" || req.headers.origin || req.headers.cookie || req.headers.authorization !== `Bearer ${fixtureReadToken}`) {
     res.writeHead(400).end(); return;
   }
   res.writeHead(200, { "Content-Type": "application/json" });
@@ -31,9 +31,10 @@ test("real browser GET without Origin reaches the server route allowlist", async
   expect(health).toEqual({ status: 200, body: { status: "ok", database: "reachable" } });
 });
 
-test("real server accepts local CLI reads but rejects hostile origins and mutations", async ({ request }) => {
+test("real server requires login for reads and rejects hostile origins and mutations", async ({ request }) => {
   const local = await request.get("/api/backend/not-allowed");
   expect(local.status()).toBe(404);
+  expect((await request.get("/api/backend/health")).status()).toBe(401);
   const hostile = await request.get("/api/backend/health", { headers: { origin: "https://example.com" } });
   expect(hostile.status()).toBe(403);
   const post = await request.post("/api/backend/health");

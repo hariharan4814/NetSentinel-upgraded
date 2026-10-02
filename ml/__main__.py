@@ -1,6 +1,7 @@
 """Explicit offline CLI. No automatic training, capture, retries or service startup."""
 import argparse
 import json
+import os
 import sys
 from urllib.parse import urlsplit
 from urllib.request import Request, build_opener, ProxyHandler, HTTPRedirectHandler
@@ -24,6 +25,15 @@ def publish(dataset, base_url, manifest=None, scores=None):
     records = rows(dataset, dataset["rows"][0]["session"]["mode"])
     if (manifest is None) != (scores is None):
         raise ValueError("Publish model manifest and scored batch together")
+    def credential(name):
+        token = os.environ.get(name, "")
+        if not (32 <= len(token) <= 256 and token.isascii() and not any(c.isspace() for c in token)) or token.startswith("replace-with-"):
+            raise ValueError(f"Configure {name} in the process environment before publication")
+        return token
+    ingest_token = credential("NETSENTINEL_INGEST_TOKEN")
+    model_token = credential("NETSENTINEL_MODEL_TOKEN") if manifest is not None else None
+    if model_token == ingest_token:
+        raise ValueError("Ingestion and model publication require separate credentials")
     if manifest is not None:
         validate_manifest(manifest)
         if scores["dataset_sha256"] != digest(dataset) or scores["model_version_id"] != manifest["id"]:
@@ -38,7 +48,8 @@ def publish(dataset, base_url, manifest=None, scores=None):
         if len(body) > 65536:
             raise ValueError("Publication record exceeds API body limit")
         request = Request(base_url.rstrip('/') + '/api/v1/' + endpoint + '/', data=body,
-                          headers={"Content-Type": "application/json"}, method="POST")
+                          headers={"Content-Type": "application/json", "Authorization": "Bearer " + (
+                              model_token if endpoint in ("model-versions", "anomaly-results") else ingest_token)}, method="POST")
         with opener.open(request, timeout=5) as response:
             if response.status not in (200, 201):
                 raise ValueError("Unexpected publication response")

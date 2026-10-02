@@ -18,6 +18,9 @@ SECRET_KEY = required("DJANGO_SECRET_KEY")
 if len(SECRET_KEY) < 50:
     raise ImproperlyConfigured("DJANGO_SECRET_KEY must contain at least 50 characters")
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
+NETSENTINEL_READ_TOKEN = os.environ.get("NETSENTINEL_READ_TOKEN", "")
+NETSENTINEL_INGEST_TOKEN = os.environ.get("NETSENTINEL_INGEST_TOKEN", "")
+NETSENTINEL_MODEL_TOKEN = os.environ.get("NETSENTINEL_MODEL_TOKEN", "")
 DATABASES = {"default": {
     "ENGINE": "django.db.backends.postgresql",
     "NAME": required("POSTGRES_DB"),

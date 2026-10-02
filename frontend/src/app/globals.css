@@ -1293,3 +1293,10 @@ summary:hover {
     transform: none !important;
   }
 }
+/* Local sign-in is isolated from the public static stylesheet. */
+.local-login { max-width: 620px; margin: 64px auto; padding: 24px; }
+.local-login form { display: grid; gap: 12px; margin: 24px 0; }
+.local-login input { width: 100%; min-width: 0; }
+.local-login .panel { padding: 28px; }
+.local-access-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 24px; background: #123a36; color: white; }
+.local-access-bar button { width: auto; min-height: 40px; }

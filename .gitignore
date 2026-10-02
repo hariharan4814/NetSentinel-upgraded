@@ -66,6 +66,10 @@ staticfiles/
 reports/generated/
 backups/
 tmp/
+companion-state/
+*.token
+.venv-companion/
+output/
 
 # Operating system and editor local state
 Thumbs.db

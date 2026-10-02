@@ -11,7 +11,7 @@ const release = path.resolve(frontend, "..", "public-release");
 // Refuse a populated staging tree: it must never accumulate non-allowlisted routes.
 if (existsSync(stage)) throw new Error(`Public staging already exists: ${stage}. Review and remove that generated directory before rebuilding.`);
 await mkdir(stage, { recursive: true });
-const files = ["src/app/page.tsx", "src/app/layout.tsx", "src/app/public.css", "src/components/public/connection-app.tsx", "src/components/public/icon.tsx", "src/lib/connection-check.ts", "src/lib/troubleshooting.ts", "public/connection-check.json", "tsconfig.json", "package.json", "package-lock.json"];
+const files = ["src/app/page.tsx", "src/app/layout.tsx", "src/app/public.css", "src/components/public/connection-app.tsx", "src/components/public/public-tools.tsx", "src/components/public/icon.tsx", "src/lib/connection-check.ts", "src/lib/troubleshooting.ts", "src/lib/public-measurements.ts", "src/lib/public-report.ts", "public/connection-check.json", "public/companion-release.json", "public/THIRD_PARTY_NOTICES.txt", "tsconfig.json", "package.json", "package-lock.json"];
 for (const file of files) {
   await mkdir(path.dirname(path.join(stage, file)), { recursive: true });
   await cp(path.join(frontend, file), path.join(stage, file));

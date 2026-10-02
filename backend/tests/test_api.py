@@ -14,9 +14,11 @@ from rest_framework.test import APITestCase
 from monitoring.models import MonitoringSession, CaptureStatus
 from telemetry.models import TelemetrySample, TrafficWindow
 from telemetry.serializers import TelemetrySampleSerializer
+from .support import ScopedFixtureClient
 
 
 class BackendTests(APITestCase):
+    client_class = ScopedFixtureClient
     def setUp(self):
         self.client.defaults["HTTP_HOST"] = "localhost"
         now = timezone.now() - timedelta(minutes=2)
@@ -273,7 +275,7 @@ class BackendTests(APITestCase):
 
     def test_only_get_and_post_are_exposed(self):
         for method in (self.client.put, self.client.patch, self.client.delete):
-            self.assertEqual(method("/api/v1/telemetry/", {}, format="json").status_code, 405)
+            self.assertEqual(method("/api/v1/telemetry/", {}, format="json").status_code, 403)
 
     def test_local_boundary_blocks_remote_browser_origins_and_spoofed_proxy_headers(self):
         for kwargs in ({"REMOTE_ADDR": "192.0.2.1"}, {"HTTP_ORIGIN": "https://example.com"},

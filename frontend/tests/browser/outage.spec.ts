@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./local-fixture";
 
 for (const historical of [false, true]) {
   test(`outage retains selection and ${historical ? "stale" : "initially fresh"} records, then recovers automatically`, async ({ page }) => {

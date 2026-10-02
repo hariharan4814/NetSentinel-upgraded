@@ -13,6 +13,10 @@ TIME_ZONE = "UTC"
 LANGUAGE_CODE = "en-us"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DATA_UPLOAD_MAX_MEMORY_SIZE = 65536
+# Runtime values are loaded after .env in settings.py. Empty values fail closed.
+NETSENTINEL_READ_TOKEN = ""
+NETSENTINEL_INGEST_TOKEN = ""
+NETSENTINEL_MODEL_TOKEN = ""
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [],
     "DEFAULT_PERMISSION_CLASSES": [],
