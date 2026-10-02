@@ -1,0 +1,6 @@
+# Windows CPython 3.11 x64 wheels. Reproduce with pip --require-hashes --only-binary=:all:.
+charset-normalizer==3.5.2 --hash=sha256:87e50a3e7cb90af586b6c5faf23e302a970415ac73bd7bd90a515a04b427ef96
+pillow==12.3.0 --hash=sha256:8e95e1385e4998ae9694eeaa4730ba5457ff61185b3a55e2e7bea0880aef452a
+psutil==7.2.2 --hash=sha256:eb7e81434c8d223ec4a219b5fc1c47d0417b12be7ea866e24fb5ad6e84b3d988
+reportlab==5.0.1 --hash=sha256:1c36e6bb0e71780c72331eba60da7f602e8d4389a8723825af71342e49d791e8
+scapy==2.7.0 --hash=sha256:eb22786da92be6fd8e5c694ae5595e4f5b9ac1f4364c9c45986844f3e3063561
