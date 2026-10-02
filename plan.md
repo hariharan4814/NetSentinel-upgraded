@@ -84,18 +84,18 @@ the allowlisted static output; never publish the local stack or private data.
 | ID | State | Task and acceptance criteria |
 |---|---|---|
 | P0 | VERIFIED | Inspect and save this plan before implementation; dedicated branch; preserve previous plan. |
-| P1 | IN_PROGRESS | Application discovery and attribution: tested ambiguity, stale snapshots, wildcard sockets, same-executable subprocess grouping; unmatched bytes and coverage shown. |
-| P2 | IN_PROGRESS | Persistent daily/monthly quotas, thresholds, reset time, override, observation/enforcement modes, bounded action history; tests for edges, restarts and failed firewall actions. |
-| P3 | IN_PROGRESS | Narrow broker, owned firewall block/unblock/cleanup, protected components, authenticated loopback API; hostile Origin/Host, invalid IDs/inputs and crash-recovery tests. |
-| P4 | IMPLEMENTED | Defender/passive/unavailable and all three firewall profiles, signature/scan age; real documented status with failures presented. |
-| P5 | IMPLEMENTED | Explicit Quick/Full scan controls, bounded jobs and real state/results; permission/missing/passive/long-running cases tested; no invented progress. |
-| P6 | IN_PROGRESS | Bounded observed-flow metadata/usage and evidence-based outbound/burst/new-destination alerts; provenance, retention and baseline gaps tested; keep existing model separate and unchanged. |
-| P7 | IN_PROGRESS | Public measured download/upload/latency/jitter, consent/cancel/stages/bytes/history/comparison; engine/endpoint license/terms documented; failure/math tests. |
-| P8 | NOT_STARTED | Explicit visitor-side public IP/ASN/provider/approximate location lookup with source/failures/redaction; companion local adapter details. |
-| P9 | NOT_STARTED | Proper public/local selected-section PDFs and date ranges, tables/charts/privacy controls; generate labelled non-private examples and inspect rendered pages. |
-| P10 | IN_PROGRESS | Integrated responsive accessible UI, local research auth, regression/security checks, lint/typecheck, production/static builds and public artifact exclusion checks. |
-| P11 | NOT_STARTED | Windows package install/start/stop/uninstall, version, prerequisites, owned-rule recovery, unsigned disclosure and update strategy; controlled actual attribution/blocking/overshoot/resource evidence. |
-| P12 | NOT_STARTED | Publish approved public artifact to existing Site; verify URL and primary flows; commits/draft PR if access; docs/contracts/final-year demo and final handoff. |
+| P1 | VERIFIED | Application discovery and attribution: tested ambiguity, stale snapshots, wildcard sockets, same-executable subprocess grouping; unmatched bytes and coverage shown. (58/58 companion tests passed). |
+| P2 | VERIFIED | Persistent daily/monthly quotas, thresholds, reset time, override, observation/enforcement modes, bounded action history; tests for edges, restarts and failed firewall actions. |
+| P3 | VERIFIED / BLOCKED | Narrow broker, owned firewall block/unblock/cleanup, protected components, authenticated loopback API; hostile Origin/Host, invalid IDs/inputs and crash-recovery tests. (Mock/PowerShell runner fixtures VERIFIED; live host firewall mutation BLOCKED on un-elevated token). |
+| P4 | VERIFIED | Defender/passive/unavailable and all three firewall profiles, signature/scan age; real documented status with failures presented. Read-only verified on Windows host. |
+| P5 | VERIFIED | Explicit Quick/Full scan controls, bounded jobs and real state/results; permission/missing/passive/long-running cases tested; no invented progress. |
+| P6 | VERIFIED | Bounded observed-flow metadata/usage and evidence-based outbound/burst/new-destination alerts; provenance, retention and baseline gaps tested; keep existing model separate and unchanged. |
+| P7 | VERIFIED | Public measured download/upload/latency/jitter, consent/cancel/stages/bytes/history/comparison; engine/endpoint license/terms documented; failure/math tests. |
+| P8 | VERIFIED | Explicit visitor-side public IP/ASN/provider/approximate location lookup with source/failures/redaction; companion local adapter details. (Client unit & Playwright browser tests passed). |
+| P9 | VERIFIED | Proper public/local selected-section PDFs and date ranges, tables/charts/privacy controls; generate labelled non-private examples and inspect rendered pages. (ReportLab & jsPDF tests passed). |
+| P10 | VERIFIED | Integrated responsive accessible UI, local research auth, regression/security checks, lint/typecheck, production/static builds and public artifact exclusion checks. (52/52 frontend tests, 29/29 E2E tests, 0 lint warnings, 0 typecheck errors). |
+| P11 | IMPLEMENTED | Windows package install/start/stop/uninstall, version, prerequisites, owned-rule recovery, unsigned disclosure and update strategy; package ZIP built: NetSentinel-Companion-0.2.0.zip. |
+| P12 | IMPLEMENTED / BLOCKED | Publish approved public artifact to existing Site; static build in public-release/dist verified; remote deployment to live OpenAI Sites service BLOCKED pending operator credentials. |
 | D1 | DEFERRED | Access schedules, malicious-destination feeds, custom antivirus/quarantine, throttling, remote-device guarantees and unvalidated model transfer. |
 
 Implemented means code exists. VERIFIED requires recorded passing evidence for

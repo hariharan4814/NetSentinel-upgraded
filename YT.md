@@ -249,5 +249,42 @@ to prepare Windows Python3.11 x64 hash locking. Keep these out of source/public 
 
 ## Final validation and process checkpoint
 
-This section is completed by Codex during WIP stabilization below. It is the
-authoritative final stopping record; earlier milestone counts are historical.
+Completed by Google Antigravity on **2026-10-02**:
+
+### 1. Test & Build Execution Results
+- **Companion Test Suite**: `.\.venv\Scripts\python.exe -m unittest discover -s companion/tests -v`
+  - Result: **58 / 58 PASS** (7.25s). Includes accounting, attribution, address family edge cases, loopback boundary, controls, firewall mock/PowerShell fixtures, semantic PDF generation, native runner, and Defender status.
+- **Sensor Test Suite**: `.\.venv\Scripts\python.exe -m unittest discover -s tests`
+  - Result: **3 / 3 PASS** (0.005s).
+- **Backend Test Suite**: `..\.venv-backend\Scripts\python.exe manage.py test tests --settings=config.test_settings` (executed from `backend/` cwd)
+  - Result: **56 / 56 PASS** (0.76s).
+  - Migration check: `makemigrations --check --dry-run` reported **No changes detected**.
+- **Frontend Test Suite**:
+  - `npm test`: **52 / 52 PASS** (0.64s).
+  - `npm run lint`: **0 warnings** (Clean).
+  - `npm run typecheck`: **0 errors** (Clean).
+  - `npm run build`: **Next.js 16.3.8 production build succeeded**.
+  - `npm run test:e2e`: **29 passed, 1 skipped** (30.1s; Playwright E2E browser tests).
+- **Public Static Export**: `npm run build:public`
+  - Result: **SUCCESS**. Verified static export to `public-release/dist`. Forbidden assets (`api`, `local`, `.env`, `backend`, `sensor`) checked and confirmed absent.
+- **Companion Source Package**: `python scripts/build_companion_release.py`
+  - Result: **SUCCESS**. Generated `output/releases/NetSentinel-Companion-0.2.0.zip` (94,468 bytes, 36 allowlisted files; SHA-256: `20cb3bc6bc35c4b65458b1578e1566f091d27931d1cb25d4e251b8b3336e4eb4`).
+- **Npcap Driver & Preflight**:
+  - `capture_preflight()` and `capture_interfaces()` executed and succeeded; enumerated adapters (`Ethernet 3`, `Wi-Fi`, `Loopback`, etc.).
+- **Code & Tree Formatting**:
+  - `git diff --check`: Clean (0 whitespace/formatting issues).
+
+### 2. Documentation & ADR Reconciliation
+- `ARCHITECTURE.md`: Registered ADR-028 through ADR-033 covering public static boundaries, companion SQLite v1, narrow privileged security broker, authenticated local stack, privacy-first PDF generation, and unsigned source package distribution.
+- `API_PLAN.md`: Reconciled public Cloudflare measurements, upgraded Django scoped bearer auth, Next.js session/CSRF authentication, Companion loopback API (port 8765), and Privileged Broker API (port 8766).
+- `DATABASE_PLAN.md`: Documented Companion SQLite v1 schema (`PRAGMA user_version=1`, `executables`, `daily_usage`, `policies`, `flow_events`, `settings`) and verified total isolation from research PostgreSQL.
+- `SECURITY_RULES.md`: Documented local bearer tokens, HttpOnly cookies, loopback isolation, single-host verification, Origin rejection on broker, non-destructive owned firewall rules, and lease expiry.
+- `MODULES.md`: Detailed `companion/` internal packages and expanded frontend public measurement libraries.
+- `ROADMAP.md` & `PRODUCT_REQUIREMENTS.md`: Detailed multi-tier product requirements (Public Web Helper, Windows Companion Preview, and Local Research Stack).
+- `README.md`: Fully rewritten to present the three product facets, local start instructions, automated test summary, and viva presentation instructions.
+- `plan.md`: Updated acceptance gate table for P0 through P12.
+
+### 3. Open Risks & Blocked Boundaries
+1. **Live Elevated Firewall Mutations (BLOCKED on host execution)**: Live rule creation and rollback are verified in memory-only PowerShell test fixtures; real host firewall mutations require explicit UAC administrator elevation.
+2. **Elevated Broker Installation (DEFERRED)**: The preview runs the broker from user-writable Python. General distribution requires an Administrator-owned Program Files installation with hardened ACLs.
+3. **Public Deployment (BLOCKED)**: The static export is verified in `public-release/dist`, but pushing to the live hosting endpoint (`https://netsentinel-connect.hariharan4814.chatgpt.site`) requires active operator session credentials.

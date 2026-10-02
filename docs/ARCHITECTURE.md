@@ -262,5 +262,46 @@ explicit limitations; kernel loss remains unknown. Full gates still precede web 
 | 025 | Offline Isolation Forest & detection metadata API | Offline CLI, strict 7-feature contract, 5+ run baseline gate, metadata-only Django app | Accepted |
 | 026 | Lightweight feature explainability & Light Theme UI | Deterministic baseline reference quantile evaluation without LLM/SHAP; dynamic DRF serializer; light theme design with Roboto typography | Accepted |
 | 027 | End-to-end demonstration readiness & viva defense | Complete integration verified against genuine LIVE Session 4 (score ~0.7314, threshold ~0.7191); viva defense guide created | Accepted |
+| 028 | Public static web utility and narrow export boundary | Public experience uses static client-side evaluation only; strict build allowlist excludes backend/local/sensor/secrets | Accepted |
+| 029 | Loopback-isolated authenticated Windows Companion | Standalone Python 3.11 companion bound to 127.0.0.1:8765; independent SQLite v1 storage; per-executable traffic accounting and quotas | Accepted |
+| 030 | Narrow privileged security broker with exact rollback | Privileged helper on 127.0.0.1:8766; rejects browser Origins; fixed native firewall rule groups with state reconciliation; Defender scan trigger | Accepted |
+| 031 | Authenticated local research stack | Scoped bearer tokens for Django REST ingestion/reads; Next.js HttpOnly session cookie and CSRF token at /local | Accepted |
+| 032 | Client & companion semantic PDF generation with privacy defaults | Client-side jsPDF and local ReportLab reports; default redaction of sensitive file paths, IP addresses, and geolocation | Accepted |
+| 033 | Unsigned source package distribution with hashed wheel locking | Reproducible source-only ZIP distribution with SHA-256 manifest; hash-pinned wheel lock; separate manual Npcap driver prerequisite | Accepted |
 
 All sprints 0 through 6 are complete, operator-tested, and verified against genuine LIVE data. Evidence is documented in respective sprint acceptance reports and [VIVA_GUIDE.md](VIVA_GUIDE.md).
+
+## Windows Companion & Public Product Architecture (2026-10 Upgrade)
+
+The 2026-10 product upgrade establishes three strictly separated execution domains:
+
+```
++---------------------------------------------------------------------------------------+
+| 1. PUBLIC WEB EXPERIENCE (Static Export)                                             |
+|    - Host: https://netsentinel-connect.hariharan4814.chatgpt.site                     |
+|    - Features: Browser HTTP connectivity check, Cloudflare speed test, IP lookup,     |
+|      guided troubleshooting, download planner, client-side PDF export                 |
+|    - Security: No loopback calls, no backend coupling, no private cookies, no storage |
++---------------------------------------------------------------------------------------+
+
++---------------------------------------------------------------------------------------+
+| 2. WINDOWS COMPANION (Installed Preview 0.2.0)                                       |
+|    - Local Service: 127.0.0.1:8765 (Bearer token in %LOCALAPPDATA%\NetSentinel\state) |
+|    - Privileged Broker: 127.0.0.1:8766 (Rejects browser Origin; distinct broker.token)|
+|    - Storage: SQLite v1 (%LOCALAPPDATA%\NetSentinel\state\companion.sqlite3)          |
+|    - Features: Per-app traffic accounting, daily/monthly quotas, opt-in firewall,     |
+|      Defender status queries, explicit scan trigger, semantic private PDF reports     |
+|    - Rules: Never claim anomaly is an attack; rollback on stop; non-destructive rules |
++---------------------------------------------------------------------------------------+
+
++---------------------------------------------------------------------------------------+
+| 3. LOCAL RESEARCH MONITOR & ML ENGINE (/local)                                       |
+|    - Web Server: Next.js on 127.0.0.1:3000 (Session cookie + CSRF token at /local)    |
+|    - Backend API: Django REST on 127.0.0.1:8001 (Bearer token authentication)         |
+|    - Telemetry DB: PostgreSQL 17 on 127.0.0.1:5432                                   |
+|    - Sensor: Scapy/psutil host packet sniffer (Ethernet 3)                            |
+|    - ML Pipeline: Offline Isolation Forest (7 host-v1 features, threshold ~0.7191)    |
++---------------------------------------------------------------------------------------+
+```
+
+See [COMPANION_SETUP.md](COMPANION_SETUP.md), [COMPANION_UPGRADE.md](COMPANION_UPGRADE.md), [LOCAL_AUTH.md](LOCAL_AUTH.md), [PUBLIC_MEASUREMENTS.md](PUBLIC_MEASUREMENTS.md), and [PUBLIC_RELEASE.md](PUBLIC_RELEASE.md) for domain-specific specifications.

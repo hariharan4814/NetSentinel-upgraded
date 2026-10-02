@@ -1,6 +1,6 @@
 # API and event plan
 
-## Public browser utility — 2026-10-01
+## Public browser utility & external measurements — 2026-10-02
 
 Public `GET /connection-check.json?check=<random-id>` serves fixed
 `{"service":"netsentinel-connectivity","version":1}`. No user content is
@@ -10,9 +10,72 @@ cancelled. The request URL is fixed; this is not a proxy or a speed-test endpoin
 Hosting sets no-store for this asset; real HTTP times include server/browser
 overhead and are scoped only to this website.
 
-The public static build has no `/api/backend/*` or `/local`. The unchanged local
+Measured speed and IP lookup contracts:
+- **Cloudflare Speed Engine**: User-initiated via `@cloudflare/speedtest` (pinned 1.14.1). Runs against public Cloudflare endpoints (`speed.cloudflare.com`). Bounded payloads (nominal 15.5 MB budget, max 62 MB cap). Measures download, upload, latency, and jitter. Real application-layer throughput, never raw wire estimates. Consent required; cancellable at any phase.
+- **Visitor-side IP & Provider Lookup**: Uses direct `https://ipapi.co/json/` fetch from the visitor's browser. No server proxy. Default-redacts IP and location; requires explicit user toggle.
+- See [PUBLIC_MEASUREMENTS.md](PUBLIC_MEASUREMENTS.md) for endpoint details and failure modes.
+
+The public static build has no `/api/backend/*` or `/local`. The local
 gateway and sensor API documented below remain available only in the local
 Next/Django stack. Public history and reports are computed in the browser.
+
+## Upgraded local research authentication (2026-10)
+
+The local Django and Next.js relay are no longer unauthenticated:
+- **Django REST Backend** (`http://127.0.0.1:8001`):
+  Requires `Authorization: Bearer <token>` on all ingestion and query endpoints:
+  - `LOCAL_AUTH_READ_KEY`: Required for GET on `/api/v1/telemetry/`, `/api/v1/windows/`, `/api/v1/capture-status/`, `/api/v1/monitoring-sessions/`, `/api/v1/anomalies/`.
+  - `LOCAL_AUTH_INGEST_KEY`: Required for POST on ingestion endpoints from `sensor/`.
+  - `LOCAL_AUTH_MODEL_KEY`: Required for model publication from `ml/`.
+  - Unauthenticated requests receive HTTP 401 Unauthorized (`{"detail": "Authentication credentials were not provided."}`).
+- **Next.js Gateway Relay** (`http://127.0.0.1:3000`):
+  - Operator sign-in at `POST /api/local-auth` sets an HttpOnly, SameSite=Strict session cookie.
+  - Requires matching CSRF token in `x-csrf-token` header for state-changing operations.
+  - Rate limiting: max 5 failed attempts per minute per loopback client.
+  - See [LOCAL_AUTH.md](LOCAL_AUTH.md) for full configuration and session lifecycle.
+
+## Windows Companion Local API (`http://127.0.0.1:8765`)
+
+The installed Windows companion operates an authenticated loopback server:
+- **Binding**: `127.0.0.1:8765` only; non-loopback connections rejected.
+- **Authentication**: `Authorization: Bearer <token>` where `<token>` is read from `%LOCALAPPDATA%\NetSentinel\state\access.token` (minimum 32 bytes, constant-time comparison).
+- **Host & Origin Security**: Validates `Host: 127.0.0.1:8765`. Rejects foreign origins; POST requires exact same-origin (`http://127.0.0.1:8765`).
+
+### Endpoints
+- `GET /api/snapshot`: Returns full JSON snapshot containing:
+  - `apps`: Discovered applications, SHA-256 executable IDs, display names, today/month usage bytes, active quotas, should_block state.
+  - `unassigned`: Total unassigned observed bytes and packet count.
+  - `capture`: Capture status (interface, state, packets, drops, socket snapshot completeness).
+  - `enforcement`: Boolean switch state.
+  - `controls`: Per-application firewall control state.
+  - `security`: Microsoft Defender and Windows Firewall profile status.
+  - `scan`: Defender scan status.
+- `POST /api/action`: Executes a bounded control action:
+  - `policy`: Update app quota thresholds, modes (observe/enforce), and overrides.
+  - `control`: App block/unblock intent (enforcement must be enabled).
+  - `enforcement`: Toggle system-wide quota enforcement (disabling triggers automatic rule cleanup).
+  - `capture-start` / `capture-stop`: Explicit interface selection and consent for Npcap capture.
+  - `security`: Query Defender and firewall status.
+  - `scan` / `scan-status`: Trigger Quick or Full Defender scan (requires explicit user consent).
+  - `cleanup`: Remove all NetSentinel-owned firewall rules.
+  - `report`: Generate semantic private PDF report with optional section selection and privacy redaction.
+
+## Privileged Windows Security Broker API (`http://127.0.0.1:8766`)
+
+The privileged broker runs in an elevated shell and exposes a minimal, hardened attack surface:
+- **Binding**: `127.0.0.1:8766` only.
+- **Authentication**: `Authorization: Bearer <token>` where `<token>` is read from `%LOCALAPPDATA%\NetSentinel\state\broker.token` (distinct from access.token).
+- **Origin Rejection**: Completely forbids browser `Origin` headers (returns HTTP 403 if present) to block browser-based drive-by attacks.
+- **Fixed Operations**:
+  - `heartbeat`: Validates broker responsiveness and updates the 30-second lease.
+  - `rules`: Queries currently active NetSentinel-owned firewall rules via NetSecurity cmdlets.
+  - `block`: Adds inbound and outbound block rules for a resolved executable path (fails closed if path is non-canonical or a system critical executable).
+  - `unblock`: Removes owned rules for the application.
+  - `cleanup`: Removes ALL NetSentinel-owned firewall rules (`RuleGroup: NetSentinel-Companion`).
+  - `scan`: Initiates `Start-MpScan` via Defender cmdlets with explicit scan type.
+  - `scan-status`: Queries Defender scan job progress.
+- **Protection**: Rejects arbitrary commands, executable paths, or script text from caller. Paths are verified against known executable IDs in trusted companion storage.
+
 
 Sprint 3 is **PASS for the agreed local dashboard integration scope** with the
 GET contracts below unchanged. [Final evidence](SPRINT3_ACCEPTANCE.md) records

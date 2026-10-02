@@ -15,6 +15,35 @@ The hosting provider may receive ordinary HTTP metadata; the UI discloses this.
 No analytics, third-party fonts, trackers or account system is introduced.
 Existing local API restrictions remain mandatory; they are not cloud auth.
 
+## 2026-10 Upgrade: Authenticated local boundaries & companion security
+
+The historical unauthenticated local exceptions below (Sprint 2/3) are superseded by the 2026-10 upgrade:
+
+### 1. Local research stack authentication
+- **Django REST Backend** (`http://127.0.0.1:8001`): Requires `Authorization: Bearer <token>` on all endpoints. Uses three scoped keys (`LOCAL_AUTH_READ_KEY`, `LOCAL_AUTH_INGEST_KEY`, `LOCAL_AUTH_MODEL_KEY`).
+- **Next.js `/local` Gateway Relay** (`http://127.0.0.1:3000`): Protects `/local` routes via HttpOnly, SameSite=Strict session cookies, validated loopback host origins, and CSRF tokens for mutating actions. Rate limits failed login attempts (max 5/min). See [LOCAL_AUTH.md](LOCAL_AUTH.md).
+
+### 2. Windows Companion security model
+- **Loopback binding**: Both dashboard (port 8765) and privileged broker (port 8766) bind strictly to `127.0.0.1`. Non-loopback packets are dropped.
+- **Separate credentials**: The dashboard and broker require distinct 256-bit secrets (`access.token` and `broker.token`) stored in `%LOCALAPPDATA%\NetSentinel\state\` with restricted file ACLs.
+- **Anti-DNS-rebinding and CSRF**:
+  - The dashboard verifies the single exact `Host: 127.0.0.1:8765` header.
+  - Mutating actions require matching `Origin: http://127.0.0.1:8765`.
+  - The privileged broker **strictly forbids any `Origin` header**, preventing browser-driven drive-by attacks entirely.
+- **Protected system components & fixed operations**:
+  - The broker rejects blocking critical Windows OS binaries (`svchost.exe`, `explorer.exe`, `ntoskrnl.exe`, etc.) and NetSentinel itself.
+  - Accepts only pre-defined, fixed operations (`rules`, `block`, `unblock`, `cleanup`, `scan`, `scan-status`). Never accepts arbitrary PowerShell script text or caller-supplied shell commands.
+  - Executable identities are resolved through SHA-256 hashes against trusted local process observations.
+- **Fail-safe firewall rules**:
+  - NetSentinel creates only owned rules tagged with `RuleGroup: NetSentinel-Companion`.
+  - Never resets the machine-wide firewall or alters unrelated rules.
+  - Heartbeat leases expire after 30 seconds, triggering automatic cleanup on broker unreachability or graceful service exit.
+  - `Recover.ps1` provides an explicit, standalone recovery tool for unconfirmed cleanup.
+- **Privileged install boundary (Current Status: Developer Preview)**:
+  - In developer preview 0.2.0, the broker is executed manually in an elevated PowerShell session from the user environment.
+  - Prior to general production release, the broker executable and Python runtime must be installed into an Administrator-owned, ACL-protected directory (e.g., `Program Files`) to prevent privilege escalation via mutable user scripts. See [COMPANION_SETUP.md](COMPANION_SETUP.md) and [YT.md](YT.md).
+
+
 ## Sprint 3 local dashboard boundary
 
 Guard correction: NextRequest normalizes loopback URLs to localhost. Validate

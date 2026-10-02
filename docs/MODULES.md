@@ -1,14 +1,33 @@
 # Module responsibilities
 
-## Public utility ownership — 2026-10-01
+## Windows Companion package (`companion/`) — 2026-10-02
 
-`frontend/src/components/public/` owns the new consumer workspace and its small
-line icons. `connection-check.ts` owns measurement, summarization, history
-validation, estimates and report formatting. `troubleshooting.ts` owns guided
-content. `public.css` owns vanilla CSS glass surfaces and responsive layouts.
-No sensor, Django or model imports cross this boundary. The original dashboard
-moves to `/local` without changing its contracts. `scripts/build-public.mjs`
-exports only explicitly listed public files; see ADR-028.
+The Windows Companion is an independent, unprivileged Python 3.11 package for Windows hosts:
+- `companion.identity`: Canonical SHA-256 application identification based on normalized lowercase binary paths.
+- `companion.attribution`: Process-to-socket attribution correlating observed IP packets with active OS sockets (using `psutil`), grouping subprocesses, handling wildcard sockets, and leaving ambiguous/unassigned packets explicitly unassigned.
+- `companion.store`: SQLite v1 storage manager managing daily/monthly quotas, threshold warnings, flow events, and persisted manual enforcement policies.
+- `companion.collector`: Captures packet metadata via Scapy `AsyncSniffer` on user-selected adapters with explicit consent; passes normalized metadata into bounded attribution queues.
+- `companion.windows_security`: Native PowerShell runner for querying Microsoft Defender status (real-time protection, signature ages, antimalware version) and Windows Firewall profiles.
+- `companion.firewall`: NetSecurity cmdlet adapter managing NetSentinel-owned block/unblock rules with automatic rollback and cleanup.
+- `companion.broker`: Authenticated HTTP client for the privileged broker helper running on port 8766.
+- `companion.http_boundary`: Loopback-isolated, bounded HTTP server enforcing constant-time token authentication, single Host header validation, and CSRF Origin checks.
+- `companion.service`: Main companion service orchestrating attribution, reconciliation of desired firewall rules against actual Windows state, and audit event dispatch.
+- `companion.reports`: Semantic vector-styled PDF report generator (using ReportLab) with date range selection and default redaction of sensitive paths and IPs.
+- `companion.web/`: Standalone vanilla HTML/CSS/JS dashboard served at `http://127.0.0.1:8765`.
+- `companion.packaging/`: PowerShell installation, startup, shutdown, broker launch, and recovery scripts.
+
+## Public utility & measurement tools (`frontend/`) — 2026-10-02
+
+`frontend/src/components/public/` owns the consumer web experience:
+- `connection-app.tsx`: Main consumer UI with connection check circle, metrics, and tab navigation.
+- `public-tools.tsx`: Measured Cloudflare speed test UI, visitor-side IP/provider lookup, and PDF report export.
+- `src/lib/connection-check.ts`: Client-side HTTP latency check logic and localStorage history persistence.
+- `src/lib/public-measurements.ts`: Cloudflare speed test harness, rate calculations, and IP lookup integrations.
+- `src/lib/public-report.ts`: Client-side semantic PDF export using `jspdf` and `jspdf-autotable`.
+- `src/lib/troubleshooting.ts`: Guided symptom troubleshooting checklists.
+- `src/app/public.css`: Pure vanilla CSS design tokens, glass surfaces, and responsive layouts.
+- `scripts/build-public.mjs`: Strict allowlist exporter copying only public client assets to `public-release/dist`.
+
 
 Sprint 3 adds `frontend/` for presentation and a bounded GET relay only.
 It imports neither sensor nor Django code. No Django apps, models or endpoints

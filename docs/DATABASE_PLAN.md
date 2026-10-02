@@ -29,6 +29,46 @@ session manifests remain. These are the implemented bounds. The larger global
 row/byte admission, automatic cleanup and database throughput budgets below
 remain future proposals, not capabilities of this minimal backend.
 
+## Windows Companion SQLite schema v1 (2026-10)
+
+The Windows Companion operates a separate, isolated, private SQLite database stored at `%LOCALAPPDATA%\NetSentinel\state\companion.sqlite3`. It does **not** use PostgreSQL, Django models, or shared tables.
+
+### Design Principles
+- Strict versioning via `PRAGMA user_version = 1`. Startup checks reject unknown schemas fail-closed.
+- Timezone: All timestamps stored as UTC ISO-8601 strings.
+- Retention: Bounded retention (default 30 days for daily buckets, max 1000 flow events, max 500 audit events).
+- Zero packet payload: Persists only aggregated byte/packet counts and flow metadata.
+
+### Entities
+1. `executables`:
+   - `id`: Canonical SHA-256 hash of the canonical lowercase Windows file path.
+   - `path`: Canonical Windows file path.
+   - `display_name`: Application executable name (e.g. `chrome.exe`).
+   - `first_seen_at`, `last_seen_at`: UTC timestamps.
+2. `daily_usage`:
+   - `app_id`: Foreign key to `executables(id)`.
+   - `day_utc`: UTC date string (`YYYY-MM-DD`).
+   - `inbound_bytes`, `outbound_bytes`: Cumulative observed IP bytes.
+   - `inbound_packets`, `outbound_packets`: Cumulative packet counts.
+   - Composite Primary Key: `(app_id, day_utc)`.
+3. `policies`:
+   - `app_id`: Primary key, references `executables(id)`.
+   - `mode`: `observe` or `enforce`.
+   - `daily_quota_bytes`, `monthly_quota_bytes`: Bounded byte thresholds (or null).
+   - `warn_percent`: Threshold percentage (default 80%) for advance warning.
+   - `manual_block`: Boolean override intent.
+   - `temporary_unblock_until`: UTC timestamp or null.
+4. `flow_events`:
+   - `id`: Auto-incrementing integer.
+   - `app_id`: Foreign key to `executables(id)` or null for unassigned flows.
+   - `observed_at`: UTC timestamp.
+   - `remote_ip`, `remote_port`, `protocol`: Flow endpoints.
+   - `bytes`, `direction`: Observed usage.
+   - `kind`: Event classification (`outbound_burst`, `new_destination`, `unusual_port`).
+5. `settings`:
+   - `key`: Primary key string.
+   - `value`: JSON-encoded string for local preferences (e.g., `enforcement: bool`, `retention_days: int`).
+
 PostgreSQL is the planned system of record for a simple local backend, introduced only in an authorized Sprint 2 after Sprint 1 passes. This is a logical contract, not migrations. Use UUID identifiers, timezone-aware UTC, foreign keys, explicit checks and versioned migrations. One database suffices; no time-series extension, per-mode database, job queue or event-sourcing system.
 
 ## Staged minimum entities

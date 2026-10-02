@@ -1,17 +1,36 @@
 # Product requirements
 
-## Current public product — 2026-10-01
+## 2026-10 Multi-Tier Product Requirements
 
-User-authorized pivot: serve everyday people with slow or unreliable internet.
-The implemented public MVP provides a bounded HTTP response check, symptom-led
-troubleshooting, optional local history/comparison/deletion, report download,
-manual-speed download planner and a how-to/privacy guide. Acceptance and limits
-are in ../plan.md and PUBLIC_RELEASE.md. It works without a sensor/backend/model.
-No whole-network health, speed-test or security claim is made.
+The 2026-10 upgrade expands NetSentinel into three well-defined experiences:
 
-The original monitor remains a local advanced tool at `/local`. All requirements
-below apply to that historical research pipeline unless superseded by ADR-028.
-The public build contains none of the private monitoring routes or data.
+### Tier 1: Public Web Utility (Static Web App)
+- **Target Audience**: Everyday computer and mobile users troubleshooting connection quality.
+- **Capabilities**:
+  1. Browser HTTP connection check (8 sequential probes, median latency, range, success/fail counts).
+  2. Measured throughput testing via Cloudflare speed test integration (download, upload, latency, jitter).
+  3. Visitor-side IP and ISP provider lookup (optional, consent-gated, default-redacted).
+  4. Bounded client-side history (max 10 records, 7-day expiry, localStorage, explicit deletion).
+  5. Privacy-first client PDF support summary export (via jsPDF).
+  6. Symptom-specific guided troubleshooting checklists and manual Mbps file transfer planner.
+- **Strict Boundary**: Works completely standalone without backend, Python, database, or packet capture drivers.
+
+### Tier 2: Windows Companion (Installed Developer Preview v0.2.0)
+- **Target Audience**: Windows desktop users seeking local application network visibility, quota control, and security posture queries.
+- **Capabilities**:
+  1. Per-executable traffic accounting (canonical SHA-256 application IDs, inbound/outbound IP byte counts).
+  2. Daily and monthly quotas with advance warnings and opt-in firewall enforcement.
+  3. Non-destructive Windows Firewall block/unblock controls via NetSecurity cmdlets with rollback and lease expiry.
+  4. Microsoft Defender and firewall profile status queries (real-time protection, signature ages, antimalware version).
+  5. Explicitly initiated Defender Quick or Full malware scans.
+  6. Semantic vector-styled PDF report export (via ReportLab) with date range selection and default redactions.
+- **Security & Privacy**: Authenticated loopback binding (port 8765 for service, port 8766 for broker), Origin validation, zero packet payload persistence, and strict separation between anomalies and firewall blocks.
+
+### Tier 3: Research Network Monitor & Anomaly Engine (`/local`)
+- **Target Audience**: Dissertation evaluators, network researchers, and security operators.
+- **Capabilities**: Unsupervised Isolation Forest anomaly detection on frozen host-v1 features, deterministic quantile-based feature explainability, real-time telemetry gauges, traffic window history, and PostgreSQL durability.
+- **Authentication**: Scoped bearer tokens in Django REST and HttpOnly session cookies with CSRF defense at `/local`.
+
 
 **NetSentinel: An Intelligent Real-Time Network Monitoring and Anomaly Detection System**
 

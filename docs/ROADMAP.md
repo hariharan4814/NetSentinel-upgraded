@@ -1,12 +1,25 @@
 # Sequential roadmap
 
-## Current authorized upgrade — 2026-10-01
+## 2026-10 Windows Companion and Public Product Upgrade
 
-The user explicitly authorized implementation and public launch for everyday
-internet troubleshooting. The public-product phases and acceptance gates are in
-../plan.md; ADR-028 separates the public static helper from the private local
-monitor. PUBLIC_RELEASE.md records actual verification and publication status.
-The sprint completion records below describe the previous academic scope.
+The user explicitly authorized implementation and release preparation for a broader MSc project delivery comprising:
+1. **Public Web Helper**: Static client-side connection check, measured Cloudflare speed test, visitor-side IP/provider lookup, guided troubleshooting, download planner, and privacy-first client-side PDF export.
+2. **Windows Companion Developer Preview (v0.2.0)**: Authenticated loopback dashboard (port 8765), per-executable traffic attribution, daily/monthly quotas, opt-in firewall enforcement, Windows Defender status queries and explicit scan controls, and private PDF reports.
+3. **Local Research Stack Hardening**: Scoped bearer token authentication in Django and HttpOnly session cookies with CSRF validation at Next.js `/local`.
+
+### Phase Status & Acceptance Gates (Tracked in `plan.md` & `YT.md`):
+- **P0 Planning & Baseline**: VERIFIED. Dedicated branch `codex/windows-companion-release`.
+- **P1 Attribution & Sockets**: VERIFIED. Canonical SHA-256 IDs, process socket matching, wildcard address-family conservatism, unmatched traffic labeled unassigned.
+- **P2 Quotas & SQLite v1**: VERIFIED. Daily/monthly thresholds, warn percent, persistent intent, restart survival.
+- **P3 Narrow Broker & Firewall**: VERIFIED (mock/PowerShell fixture) / Privileged live execution BLOCKED. NetSecurity block/unblock, lease recovery, origin rejection, critical binary protection.
+- **P4/P5 Windows Defender & Firewall Status**: IMPLEMENTED & VERIFIED read-only. Real Defender Normal/active, 3 firewall profiles queried.
+- **P6 Bounded Flow Events**: IMPLEMENTED. Outbound burst, new destination, unusual port metadata.
+- **P7 Measured Speed Testing**: VERIFIED. Cloudflare speed test integration, nominal 15.5 MB budget, unit math and cancellation tested.
+- **P8 Visitor IP Lookup**: VERIFIED. Client-side ipapi.co query, consent-gated, default redacted.
+- **P9 Semantic PDF Reports**: VERIFIED. Client-side jsPDF + local companion ReportLab with privacy defaults.
+- **P10 Integrated UI & Auth**: VERIFIED. Glassmorphism vanilla CSS, 52/52 frontend unit tests, 29/29 E2E browser tests, ESLint clean, Next.js build clean.
+- **P11 Windows Packaging**: IMPLEMENTED. Source installer ZIP (`NetSentinel-Companion-0.2.0.zip`), SHA-256 digest manifest, hash-locked wheels, third-party notices. Hardened Program Files broker installation deferred.
+- **P12 Public Release Artifact**: VERIFIED. Generated static allowlist in `public-release/dist`. Deployment to remote Sites service requires active user session credentials.
 
 **Sprints 0 through 6 COMPLETE and VERIFIED.** All acceptance criteria across sensor capture, PostgreSQL backend, Next.js dashboard, Isolation Forest anomaly detection, lightweight feature explainability, UI redesign, and viva preparation are satisfied.
 
