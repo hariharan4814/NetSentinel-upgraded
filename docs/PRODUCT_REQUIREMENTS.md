@@ -1,5 +1,16 @@
 # Product requirements
 
+## Active next scope — AI Lab prototype, 2026-10-04
+
+The user requested a stronger AI research prototype with simulated normal and
+attack-like traffic, actual training, explanation and evaluation. The detailed
+requirements, acceptance gates and status are now at the top of [plan.md](../plan.md).
+The core lab is now implemented; current verification and remaining gates are recorded in plan.md. Existing products
+below are preserved as supporting experiences; their remaining production gates
+are not prerequisites for metadata-only simulation. Synthetic results must be
+labelled, actually computed and kept separate from LIVE claims. See ADR-034 in
+[ARCHITECTURE.md](ARCHITECTURE.md) for the proposed boundary.
+
 ## 2026-10 Multi-Tier Product Requirements
 
 The 2026-10 upgrade expands NetSentinel into three well-defined experiences:

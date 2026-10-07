@@ -1,5 +1,19 @@
 # Security rules
 
+## AI Lab boundary — 2026-10-05
+
+The local experiment UI reuses operator sessions and CSRF protection. Django
+adds separate `NETSENTINEL_LAB_TOKEN` and `NETSENTINEL_LAB_WORKER_TOKEN`; neither
+the original read credential nor browser controls can claim/finish worker jobs.
+Only the fixed lab API accepts scenario configuration and generated job IDs.
+No arbitrary Python, target URL, file path or pickle upload is accepted.
+Training executes in an explicitly started bounded worker, never a web request.
+SIMULATION models cannot enter the original LIVE model registry. See
+[AI_LAB_CONTRACT.md](AI_LAB_CONTRACT.md) for scopes, leases and body limits.
+The larger finish payload limit is granted only after worker authentication;
+other API body limits remain unchanged. Public export excludes lab routes,
+workers, sources, downloaded resources, models and credentials.
+
 ## Public distribution boundary — 2026-10-01
 
 ADR-028 authorizes a public static connection helper. Only the allowlisted export
@@ -20,7 +34,7 @@ Existing local API restrictions remain mandatory; they are not cloud auth.
 The historical unauthenticated local exceptions below (Sprint 2/3) are superseded by the 2026-10 upgrade:
 
 ### 1. Local research stack authentication
-- **Django REST Backend** (`http://127.0.0.1:8001`): Requires `Authorization: Bearer <token>` on all endpoints. Uses three scoped keys (`LOCAL_AUTH_READ_KEY`, `LOCAL_AUTH_INGEST_KEY`, `LOCAL_AUTH_MODEL_KEY`).
+- **Django REST Backend** (`http://127.0.0.1:8001`): Requires `Authorization: Bearer <token>` on all endpoints. The original scopes use `NETSENTINEL_READ_TOKEN`, `NETSENTINEL_INGEST_TOKEN`, `NETSENTINEL_MODEL_TOKEN`; AI Lab adds the separate job/worker keys above.
 - **Next.js `/local` Gateway Relay** (`http://127.0.0.1:3000`): Protects `/local` routes via HttpOnly, SameSite=Strict session cookies, validated loopback host origins, and CSRF tokens for mutating actions. Rate limits failed login attempts (max 5/min). See [LOCAL_AUTH.md](LOCAL_AUTH.md).
 
 ### 2. Windows Companion security model

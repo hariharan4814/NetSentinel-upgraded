@@ -1,5 +1,16 @@
 # Sequential roadmap
 
+## Active next roadmap — AI Lab, 2026-10-04
+
+Follow A1–A8 in the active [plan.md](../plan.md): contracts and protocol →
+independent simulator → genuine training and group-separated evaluation →
+explanations → bounded local jobs → experiment UI → reports/viva → integration
+and measurement. The optional grounded assistant, external benchmark and public
+recorded showcase follow the core. Implementation is underway; the current plan records which of those
+new implementation milestones have been verified. Keep the previous product/source;
+defer its unresolved production Windows release work for the new AI core.
+Historical stages/evidence below are not evidence that the AI Lab is complete.
+
 ## 2026-10 Windows Companion and Public Product Upgrade
 
 The user explicitly authorized implementation and release preparation for a broader MSc project delivery comprising:
@@ -15,13 +26,13 @@ The user explicitly authorized implementation and release preparation for a broa
 - **P4/P5 Windows Defender & Firewall Status**: IMPLEMENTED & VERIFIED read-only. Real Defender Normal/active, 3 firewall profiles queried.
 - **P6 Bounded Flow Events**: IMPLEMENTED. Outbound burst, new destination, unusual port metadata.
 - **P7 Measured Speed Testing**: VERIFIED. Cloudflare speed test integration, nominal 15.5 MB budget, unit math and cancellation tested.
-- **P8 Visitor IP Lookup**: VERIFIED. Client-side ipapi.co query, consent-gated, default redacted.
+- **P8 Visitor IP Lookup**: VERIFIED. Client-side ipwho.is query, consent-gated, default redacted.
 - **P9 Semantic PDF Reports**: VERIFIED. Client-side jsPDF + local companion ReportLab with privacy defaults.
 - **P10 Integrated UI & Auth**: VERIFIED. Glassmorphism vanilla CSS, 52/52 frontend unit tests, 29/29 E2E browser tests, ESLint clean, Next.js build clean.
 - **P11 Windows Packaging**: IMPLEMENTED. Source installer ZIP (`NetSentinel-Companion-0.2.0.zip`), SHA-256 digest manifest, hash-locked wheels, third-party notices. Hardened Program Files broker installation deferred.
 - **P12 Public Release Artifact**: VERIFIED. Generated static allowlist in `public-release/dist`. Deployment to remote Sites service requires active user session credentials.
 
-**Sprints 0 through 6 COMPLETE and VERIFIED.** All acceptance criteria across sensor capture, PostgreSQL backend, Next.js dashboard, Isolation Forest anomaly detection, lightweight feature explainability, UI redesign, and viva preparation are satisfied.
+**Historical evidence:** sprint reports below describe earlier checks. Outstanding release gates and current AI Lab acceptance are tracked in plan.md; do not treat these historical totals as a new complete acceptance run.
 
 - **Sprint 0:** Planning & Architecture — COMPLETE.
 - **Sprint 1:** Native Windows Sensor & Safe Recovery (`Ethernet 3`) — PASS (committed at `ea8819a`).

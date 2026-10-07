@@ -1,5 +1,128 @@
 # NetSentinel handoff to Google Antigravity
 
+## Current checkpoint — 2026-10-07
+
+**The local AI prototype is complete; stop core coding.** Read the current
+[plan.md](plan.md) Resume Here before the historical entries below. Core source
+is committed on `codex/ai-lab-prototype` (`c233830`, `9a3d1ae`); final documentation
+and release housekeeping follow. Preserve the unrelated next-env.d.ts edit.
+
+The project now generates virtual metadata, trains/evaluates real IF/RF models,
+compares baselines, explains with validated SHAP, runs repeated-seed/unknown-family
+studies, and offers an authenticated glass UI with playback and PDF/JSON export.
+Everything is explicitly SIMULATION. No packets or attacks are emitted.
+
+Setup and viva: [AI_LAB_SETUP.md](docs/AI_LAB_SETUP.md). Start with
+`.venv-lab/Scripts/python.exe scripts/run_ai_lab.py` from the repository root.
+The separate SQLite lab runtime needs no PostgreSQL/Npcap/admin. Existing research
+PostgreSQL and Windows companion are preserved, with their limitations unchanged.
+
+Verified: lab 41, backend 70, frontend 58 tests; 31 browser passes/1 opt-in LIVE
+skip; build/lint/types/public exclusion; actual browser training and mobile PDF
+download; final ten-page semantic report individually rendered/inspected. Earlier
+sensor/ML/companion regressions passed with explicit skips recorded in plan.md.
+Actual auth/cancellation/full-stack restart integration passed after final fixes.
+All QA servers/workers have been stopped. Generated evidence paths and hashes,
+source commit details, tested commands and exact remaining procedures are in plan.md.
+
+Remaining work is outside the verified core: PostgreSQL installation/integration
+BLOCKED; external dataset access BLOCKED; optional LLM/public AI showcase,
+drift/ablation and production Windows release/signing DEFERRED. Do not fabricate
+completion or re-run old capture/control actions to make the AI demo look LIVE.
+Source release/PR status is recorded in the final release checkpoint in plan.md.
+
+## Historical handoff entries
+
+## Earlier checkpoint — resources downloaded; coding later
+
+The user's latest instruction is to download external resources first and leave
+application coding for later. R0 core acquisition is complete: **40 inventoried
+artifacts / about 129 MB**, including 20 candidate wheels, two source archives,
+three papers, licenses/docs and the optional Qwen model reference. Read the
+[resource guide](resources/ai-lab/README.md),
+[inventory](resources/ai-lab/manifest.json) and current [plan](plan.md).
+
+Publisher hashes, archive integrity and offline hash-required resolution passed;
+installed packages were unchanged. Nothing was installed/trained and no product
+code changed. Python 3.11.0/pip 22.3 work with scoped permission outside the
+restricted sandbox; do not rebuild environments because of earlier launcher
+errors. SHAP 0.51.0 is cached for Python 3.11; runtime/Numba integration and
+explanation correctness still require tests in the future coding phase.
+
+CICIDS2017 CSV is **BLOCKED** at official registration; no identity was submitted
+or mirror substituted. Optional LLM weights/runtime are **DEFERRED**. Neither
+blocks the independent simulator. A1–A8 remain NOT_STARTED. Next coding action
+is A1's contracts/schemas/split protocol.
+
+The cache is ignored by Git: preserve it separately during handoff or re-fetch
+using manifest URLs/hashes. Branch/commit unchanged:
+`codex/windows-companion-release` / `65966ed`. No background process remains.
+
+## New active task — AI Lab prototype plan, 2026-10-04
+
+**Read the new top section of [plan.md](plan.md) first.** The user has redirected
+the project toward an M.Sc. AI prototype: generated benign/attack-like traffic,
+real model training, explainable predictions, comparisons and a reproducible
+demonstration. They asked for a clear plan before proceeding. The initial
+checkpoint was documentation only; no AI Lab implementation or experiment result
+is claimed. The old release handoff below is preserved for reference.
+
+Current branch: `codex/windows-companion-release`. Starting/latest relevant
+commit: `65966edfd73f85370ed0ee65baa78a11b1a1d50d`. Preserve the existing
+`frontend/next-env.d.ts` modification and all newer work. Check Git status rather
+than assuming the tree is clean. Do not reset to the old handoff's starting commit.
+
+### What the next agent should build
+
+1. A seeded, bounded metadata simulator using existing sensor aggregation; it
+   sends no packets and needs no administrator rights or Npcap.
+2. A genuine ML experiment pipeline: Isolation Forest, Random Forest behaviour
+   classification, rule/dummy baselines, disjoint run-group splits and honest
+   held-out evaluation. Never confuse synthetic labels with real attack proof.
+3. An authenticated local `/lab` with Scenario Studio, Training, Detection,
+   Explain & Compare, and research reports. Use the revised `designplan.md`.
+4. Learned-reference and SHAP explanations, reproducible JSON/PDF results and
+   a viva guide including false positives and limitations.
+5. Optional extensions after the core: local grounded AI assistant, separate
+   CICIDS2017 benchmark and a labelled recorded public simulation showcase.
+
+### Exact starting work and caveats
+
+- Start **A1 in `plan.md`**: finalize the lab contracts, features, labels and
+  grouped split protocol. Then implement the A2/A3 CLI vertical slice before UI.
+- Existing `ml/pipeline.py` slices rows into 180/60/60 and does not enforce
+  independent run groups across those splits. An old test name/docs claim more
+  than the implementation proves. Do not reuse that as a verified lab split.
+- Existing `backend/detection/explain.py` defaults to static reference numbers.
+  A new lab explanation needs statistics from its saved training data/model.
+- Root `unittest discover -s tests` is the publication-auth suite, not all sensor
+  tests. Run `tests/sensor` and `tests/ml` explicitly; exact commands are in the
+  active plan. Historical totals below are not current lab evidence.
+- Current source uses `ipwho.is` for lookup and `NETSENTINEL_*` auth variables;
+  reconcile active documentation drift during A1 instead of copying old summaries.
+- Preserve host-v1, original model compatibility, provenance and the independent
+  sensor. Give new lab models their own bundle contract. No automatic LIVE
+  promotion, anomaly-driven firewall blocking or fake training progress.
+- Proposed new `lab` commands, Django experiment app and worker do not exist yet.
+  No new dependency, model weights, migration, synthetic dataset or running job
+  was created during this planning checkpoint.
+- Planning-document checks passed using PowerShell. A `.venv` Python launcher
+  failed to start its referenced interpreter; diagnose runtime availability before
+  tests rather than assuming old environment versions still work. This was not
+  an application-test failure, and the cause is not established.
+- Old Windows privileged-install/blocking/signing gates are **deferred for the
+  AI core**; they still apply before a production companion release. The public
+  site has not been updated with AI Lab features. Do not claim otherwise.
+
+The active plan has ordered tasks/states, licenses and references, database/API
+design, validation commands, risks and a durable **Resume Here** section. Record
+each implementation milestone there, with exact results and current commit.
+Keep this file as a concise entry point rather than a competing status ledger.
+
+---
+
+## Historical Windows companion release handoff (2026-10-02)
+
 Handoff requested by the user on **2026-10-02 (Asia/Calcutta)**. The user asked
 Codex to stop the larger upgrade, stabilize work in progress, and leave exact
 continuation instructions. **This is not a completed release.** Do not interpret

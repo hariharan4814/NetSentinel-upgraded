@@ -1,5 +1,77 @@
 # Architecture
 
+## ADR-035 — explicit standalone simulation demo database
+
+**Accepted for local prototype implementation, 2026-10-05.** The configured
+PostgreSQL connection timed out; the remaining installation directory contained
+data but no discovered runtime executables/service. Do not modify that data or
+pretend the database was verified. The user wants a usable simulation prototype.
+
+Add `config.lab_settings` as an explicit opt-in runtime with a separate ignored
+SQLite database and lab-only URLs. It exposes experiments, not the original
+monitor/telemetry/model-ingestion routes. Keep operator/session/job/worker auth
+and loopback boundaries identical. Configure secrets through environment; never
+default to known demo tokens. Serialise writers with a persisted singleton lock
+row before queue admission/claim; retain a unique running-job constraint and
+lease recovery. SQLite tests and demo are not PostgreSQL concurrency evidence.
+
+Consequences: the AI demonstration runs without an installed PostgreSQL service
+or admin rights, while the original research settings still require PostgreSQL.
+There is no automatic database fallback. Document both startup modes; independent
+lab CLI remains usable without either database. PostgreSQL migration/concurrency
+verification is still BLOCKED on this host until its runtime is restored.
+
+## ADR-034 — reproducible AI experiment lab with separate simulation models
+
+**Accepted for implementation, 2026-10-05; originally proposed 2026-10-04.**
+The user resumed execution after external resource acquisition. See the active
+[execution plan](../plan.md) and [design plan](../designplan.md).
+
+Reason: existing public utilities and native controls do not provide a coherent
+AI research experiment. A student must be able to generate repeatable workloads,
+train actual models, test unseen runs, inspect explanations and defend measured
+results without an enterprise network or real attack traffic.
+
+Decision: add an independent metadata-only `lab/` pipeline and local Next `/lab`
+workbench, with one cohesive Django experiments module, durable bounded jobs and
+one explicitly started ML worker. Implement the independent CLI first. Reuse
+shared pure sensor aggregation and preserve the original host-v1 model/runtime.
+Use Isolation Forest for deviation and Random Forest for behaviour classification,
+with rules/dummy comparators, disjoint run-group splits and saved learned
+explanation references. SHAP is proposed for the supported classifier after a
+compatibility test. Optional local LLM explanations use facts, not OS tools.
+
+Consequences and boundaries:
+
+- Synthetic datasets/models stay SIMULATION in an independent versioned lab
+  contract/registry. New features do not redefine the seven host-v1 values.
+  Incomplete observations remain unscored. No model promotion to LIVE based on
+  matching column names or impressive synthetic accuracy.
+- Generated truth is evaluator-only sidecar data, not predictor input. Split
+  complete independent runs and related configurations; reference/background
+  statistics use training data only. No fake outcomes or desired accuracy target.
+- The simulator emits metadata in memory, not packets. It requires no Npcap,
+  elevation, firewall action, third-party lookup or connection to a target.
+- Next and Django remain authenticated, unprivileged and loopback-bound.
+  Worker jobs accept fixed schemas/IDs, never uploaded Python/pickle or arbitrary
+  commands/paths. Training is outside HTTP request processing; CLI remains usable
+  offline without Django/PostgreSQL. Final worker API/schema belong to A1/A5.
+- Public export excludes `/lab`, its APIs, jobs, model files, private artifacts
+  and credentials. A future public showcase may contain reviewed synthetic
+  result assets only and must identify recorded simulation explicitly.
+- Preserve the public tools, Windows companion and `/local`. Companion production
+  hardening is deferred for this prototype; its previous acceptance gates remain.
+
+Scope interaction: the earlier single-model/no-SHAP/no-browser-job restrictions
+are superseded **only for the requested experimental lab**. Original LIVE
+measurement/privacy/safety contracts remain. Historical sprint completion text
+does not verify this lab or settle the newly observed split/reference gaps.
+The 2026-10-04 planning checkpoint had no implementation. The 2026-10-05 work
+uses a separate `.venv-lab`, shared dependency-free lab contracts, and one
+`experiments.ExperimentJob` model holding bounded configuration/result metadata
+and leases. This avoids empty entity scaffolds; model bundles remain on disk.
+Progress and evidence are recorded in plan.md, not inferred from this decision.
+
 ## ADR-028 — public connection helper and separate static distribution
 
 **Accepted, 2026-10-01, under the user's explicit upgrade/public-launch request.**
@@ -244,6 +316,7 @@ explicit limitations; kernel loss remains unknown. Full gates still precede web 
 
 | ADR | Decision | Reason and consequence | Status |
 | --- | --- | --- | --- |
+| 034 | Separate reproducible AI Lab; metadata simulation, real model comparison, bounded local jobs | Stronger academic experiment without real attack generation or LIVE contamination; preserve prior products | Proposed implementation; active plan 2026-10-04 |
 | 001 | Modular Django monolith plus local sensor | Clear privileges and ownership without many services | Accepted |
 | 002 | Metadata/flow persistence, no payload by default | Reduces privacy and storage burden; limits content-based conclusions | Accepted |
 | 003 | Isolation Forest plus separate interpretation | Scientific honesty; requires independent rule evaluation | Accepted |
@@ -269,7 +342,7 @@ explicit limitations; kernel loss remains unknown. Full gates still precede web 
 | 032 | Client & companion semantic PDF generation with privacy defaults | Client-side jsPDF and local ReportLab reports; default redaction of sensitive file paths, IP addresses, and geolocation | Accepted |
 | 033 | Unsigned source package distribution with hashed wheel locking | Reproducible source-only ZIP distribution with SHA-256 manifest; hash-pinned wheel lock; separate manual Npcap driver prerequisite | Accepted |
 
-All sprints 0 through 6 are complete, operator-tested, and verified against genuine LIVE data. Evidence is documented in respective sprint acceptance reports and [VIVA_GUIDE.md](VIVA_GUIDE.md).
+Historical sprint reports describe earlier operator observations; they do not establish current complete release acceptance or AI Lab validation. Evidence is documented in respective sprint acceptance reports and [VIVA_GUIDE.md](VIVA_GUIDE.md).
 
 ## Windows Companion & Public Product Architecture (2026-10 Upgrade)
 

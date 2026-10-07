@@ -1,5 +1,21 @@
-# NetSentinel — Network Visibility, Quota Control & Intelligent Telemetry
+# NetSentinel AI Lab
 
+An explainable network anomaly detection and traffic simulation prototype for
+M.Sc. Computer Science. Generate virtual metadata, train real models, evaluate
+held-out runs, inspect explanations and export reports. All lab results are
+labelled **SIMULATION**; no attack traffic is emitted.
+
+Start with [AI Lab setup and viva steps](docs/AI_LAB_SETUP.md). The active
+[execution plan](plan.md), [design plan](designplan.md) and [handoff](YT.md)
+record current verification and remaining work. The local `/lab` experience
+preserves the public connection helper, `/local` research monitor and Windows
+companion below. Public hosting does not expose the local AI worker or controls.
+
+External resources were downloaded before coding. The isolated `.venv-lab`
+runtime now uses the [hash-pinned requirements](requirements-lab.lock); see the
+[resource inventory](resources/ai-lab/README.md) for sources and licenses.
+
+## Existing supporting applications
 NetSentinel delivers three cohesive experiences:
 1. **Public Web Utility**: A zero-setup browser tool for everyday users to check connectivity, measure real download/upload speed, look up their provider, follow guided troubleshooting, and export support PDFs.
 2. **Windows Companion (Developer Preview 0.2.0)**: A loopback-authenticated desktop dashboard providing per-application traffic accounting, daily/monthly quotas, opt-in Windows Firewall enforcement, Microsoft Defender status & scan controls, and private PDF reports.
@@ -13,7 +29,7 @@ NetSentinel delivers three cohesive experiences:
 
 - **Connectivity Probes**: 8 sequential same-origin HTTP probes measuring median latency, jitter/range, and failure counts.
 - **Measured Speed Testing**: User-initiated Cloudflare speed test integration (`@cloudflare/speedtest`) with bounded payload budgets (nominal 15.5 MB, max 62 MB cap). Measures real application throughput, never wire estimates.
-- **Visitor Provider Lookup**: Direct client-side `ipapi.co` lookup (consent-gated, default-redacted IP and location).
+- **Visitor Provider Lookup**: Direct client-side `ipwho.is` lookup (consent-gated, default-redacted IP and location).
 - **Client-Side Support Reports**: Bounded 7-day browser history and downloadable semantic PDF reports (`jspdf`).
 - **Guided Troubleshooting**: Symptom-based step-by-step checklists for slow browsing, video call drops, and complete outages.
 

@@ -1,5 +1,37 @@
 # API and event plan
 
+## Implemented SIMULATION AI Lab API — 2026-10-05
+
+The versioned request/result shapes are in [AI_LAB_CONTRACT.md](AI_LAB_CONTRACT.md).
+Django stores bounded jobs in `experiments`; fitting occurs only in the independent
+`python -m lab.worker` process. This interface cannot run shell commands, choose
+paths, capture packets, publish LIVE models, or change Windows security controls.
+
+| Method/path under `/api/v1/lab/` | Credential | Behaviour |
+| --- | --- | --- |
+| GET `jobs/`, `jobs/<uuid>/` | `NETSENTINEL_READ_TOKEN` | Latest 20 summaries; detail includes a completed result |
+| POST `jobs/` | `NETSENTINEL_LAB_TOKEN` | Validated `{config}`; 201 or 429 if four jobs wait |
+| POST `jobs/<uuid>/cancel/` | `NETSENTINEL_LAB_TOKEN` | Empty object; queued cancellation or running cancellation request |
+| POST `worker/claim/` | `NETSENTINEL_LAB_WORKER_TOKEN` | One running lease maximum; raw lease sent only to worker |
+| POST `worker/<uuid>/heartbeat/` | Worker token + lease | Renew 30-second lease; actual stage/counts and cancellation flag |
+| POST `worker/<uuid>/finish/` | Worker token + lease | Bounded validated SIMULATION result or terminal failure/cancellation |
+
+Inputs reject unsupported keys, query parameters, duplicate JSON keys, non-finite
+numbers and invalid UUID routes. Only authenticated worker finish has a 4 MiB
+body allowance; other requests retain 64 KiB. Lease hashes, tokens and artifact
+paths never appear in job serializers. Arbitrary failure messages are discarded
+in favour of a fixed message. Expired RUNNING jobs become FAILED/interrupted on
+the next job operation. Completed cancellation is idempotent; finish requires
+the active lease and is not replayable. Network failure after a finish response
+may therefore be ambiguous to the worker; read the retained job before retrying.
+
+The browser uses authenticated same-origin `/api/lab/jobs` relays with exact
+Origin, session and CSRF checks for mutations. It has no worker credential.
+Explicit `config.lab_settings` exposes only lab routes with a separate SQLite
+database; normal `config.settings` preserves PostgreSQL and research APIs.
+No automatic database fallback exists. Tests cover temporary SQLite concurrency
+and fresh-process persistence; PostgreSQL concurrency remains a separate gate.
+
 ## Public browser utility & external measurements — 2026-10-02
 
 Public `GET /connection-check.json?check=<random-id>` serves fixed
@@ -12,7 +44,7 @@ overhead and are scoped only to this website.
 
 Measured speed and IP lookup contracts:
 - **Cloudflare Speed Engine**: User-initiated via `@cloudflare/speedtest` (pinned 1.14.1). Runs against public Cloudflare endpoints (`speed.cloudflare.com`). Bounded payloads (nominal 15.5 MB budget, max 62 MB cap). Measures download, upload, latency, and jitter. Real application-layer throughput, never raw wire estimates. Consent required; cancellable at any phase.
-- **Visitor-side IP & Provider Lookup**: Uses direct `https://ipapi.co/json/` fetch from the visitor's browser. No server proxy. Default-redacts IP and location; requires explicit user toggle.
+- **Visitor-side IP & Provider Lookup**: Uses direct `https://ipwho.is/` fetch from the visitor's browser. No server proxy. Default-redacts IP and location; requires explicit user toggle.
 - See [PUBLIC_MEASUREMENTS.md](PUBLIC_MEASUREMENTS.md) for endpoint details and failure modes.
 
 The public static build has no `/api/backend/*` or `/local`. The local
@@ -24,10 +56,10 @@ Next/Django stack. Public history and reports are computed in the browser.
 The local Django and Next.js relay are no longer unauthenticated:
 - **Django REST Backend** (`http://127.0.0.1:8001`):
   Requires `Authorization: Bearer <token>` on all ingestion and query endpoints:
-  - `LOCAL_AUTH_READ_KEY`: Required for GET on `/api/v1/telemetry/`, `/api/v1/windows/`, `/api/v1/capture-status/`, `/api/v1/monitoring-sessions/`, `/api/v1/anomalies/`.
-  - `LOCAL_AUTH_INGEST_KEY`: Required for POST on ingestion endpoints from `sensor/`.
-  - `LOCAL_AUTH_MODEL_KEY`: Required for model publication from `ml/`.
-  - Unauthenticated requests receive HTTP 401 Unauthorized (`{"detail": "Authentication credentials were not provided."}`).
+  - `NETSENTINEL_READ_TOKEN`: Required for GET on permitted read endpoints.
+  - `NETSENTINEL_INGEST_TOKEN`: Required for POST on monitoring-sessions, telemetry, windows and capture-status.
+  - `NETSENTINEL_MODEL_TOKEN`: Required for model-versions and anomaly-results publication from `ml/`.
+  - Unauthenticated requests receive HTTP 401 (`{"error":"authentication_required"}`).
 - **Next.js Gateway Relay** (`http://127.0.0.1:3000`):
   - Operator sign-in at `POST /api/local-auth` sets an HttpOnly, SameSite=Strict session cookie.
   - Requires matching CSRF token in `x-csrf-token` header for state-changing operations.

@@ -1,5 +1,139 @@
 # ML methodology
 
+## Implemented lab extension — 2026-10-05
+
+The independent `lab/` package now generates metadata, trains Isolation Forest
+and Random Forest, evaluates against dummy/rule comparators, and computes real
+SHAP contributions. Its contract is [AI_LAB_CONTRACT.md](AI_LAB_CONTRACT.md).
+All results are **SIMULATION**, with no network transmission, capture driver,
+Django or database dependency in the core. The historical host-v1/LIVE protocol
+below is preserved separately; these experiments do not validate or replace it.
+
+### Reproducible procedure
+
+Five configurable families generate payload-free `PacketMetadata` using reserved
+documentation addresses: routine, bulk transfer, fanout, SYN burst and UDP burst.
+Noise deliberately mixes distributions without changing the injected scenario
+role. Challenge runs also contain routine windows. Thus features overlap and
+some family labels are not recoverable from the seven aggregate inputs; accuracy
+is not scripted. Missing observations remain null and are excluded with counts.
+
+Each run receives a seed derived from the experiment seed, family and run index.
+Whole runs are assigned before generation: floor(60%) training, max(1,
+floor(20%)) validation, remainder test, independently within each family. No
+window-level shuffle splits. The unchanged sensor aggregator produces seven
+ordered host-v1 values in ten-second virtual windows. Only those numeric values
+enter estimators: run IDs, seeds and the truth sidecar are excluded.
+
+Isolation Forest uses 100 trees, benign training only, at most 256 samples/tree,
+one CPU worker and a fixed seed. It flags negative `score_samples` strictly above
+the linear 99th percentile of benign validation scores. Random Forest uses 100
+trees, depth at most 12, minimum leaf size 2, balanced class weights, one worker
+and the same fixed seed. It predicts an injected behaviour family, not an attack
+or malware probability. Hyperparameters and heuristic thresholds are fixed and
+not chosen from held-out metrics. The dummy predicts the most frequent training
+family. Heuristic priority is UDP fraction >=0.7, SYN fraction >=0.55, remote
+peers >=18, then IP bytes/second >=9000, otherwise routine.
+
+Benign training quantiles provide descriptive references. TreeSHAP uses at most
+64 all-family training rows as its background and explains the predicted class's
+probability output; the implementation checks base plus contributions against
+the actual classifier output within 1e-5. It describes the fitted model, not
+causation. Unavailable SHAP produces a visible limitation, never invented values.
+
+Default-configuration browser QA on 2026-10-06 found an important compatibility
+case: TreeExplainer's parsed model matched Random Forest predictions, but its
+interventional contributions disagreed by up to 0.03018. Explicit float32 inputs
+did not resolve this. NetSentinel retains the 1e-5 output check across **all**
+classes and falls back to the library's
+[ExactExplainer](https://shap.readthedocs.io/en/latest/generated/shap.ExactExplainer.html),
+calling the actual classifier with the same training-only background. Seven
+features bound this to at most 128 coalitions, 64 background rows and eight
+displayed cases. Cancellation is checked between cases; the worker also has an
+owned-process time limit. Each case records its actual method, and the result
+discloses fallback. No contributions are rescaled or manufactured to make the
+check pass. This fallback still explains independent feature interventions and
+can evaluate combinations outside the observed traffic distribution.
+
+Classification metrics use all complete test windows. Per-class undefined
+precision/recall/F1 use zero, explicitly following the zero-division convention;
+balanced accuracy averages supported-class recall. Anomaly precision, recall,
+false-positive rate and alerts/hour are null when their denominator is zero;
+average precision is null unless both challenge and benign windows exist.
+False alerts/hour divides flagged benign windows by complete benign **virtual**
+ten-second observation time. It is not measured real-world alert burden.
+
+```powershell
+.\.venv-lab\Scripts\python.exe -m lab demo --out artifacts/lab/my-experiment
+.\.venv-lab\Scripts\python.exe -m lab inspect artifacts/lab/my-experiment
+.\.venv-lab\Scripts\python.exe -m lab generate --out artifacts/lab/my-dataset
+.\.venv-lab\Scripts\python.exe -m lab benchmark --out artifacts/lab/my-study --seeds 42 43 44 --bootstrap-repetitions 200
+.\.venv-lab\Scripts\python.exe -m unittest discover -s tests/lab -p test_pipeline.py -v
+```
+
+Choose unused output directories. Artifacts include dataset, separate truth,
+splits, model, result and SHA-256/environment manifest. A model loader requires a
+digest obtained independently from a trusted local run, checks the environment
+and refuses LIVE bundles. An adjacent manifest alone cannot make joblib/pickle
+safe. The public website and browser API cannot upload or activate these models.
+
+### Additional study and measured limitations
+
+The optional CLI benchmark supports two to five independent seeds and 50–1000
+bootstrap replicates. It resamples **whole test runs** with the fitted estimator
+fixed and reports conditional 95% percentile macro-F1 intervals. It retains all
+five class positions; a resample missing a family has zero F1 for that family.
+This conservative convention can produce wide intervals with few runs. It does
+not estimate training uncertainty; sample standard deviation across seeds is
+reported separately. Seeds are not selected for favorable results.
+
+The excluded-family study removes all training runs for one challenge family
+(default fanout), including their routine windows, then evaluates the excluded
+family's held-out challenge windows. It reports forced known-class predictions
+and Isolation Forest flagged fraction. The classifier has no open-set rejection
+class. Isolation Forest already trains only on benign data; this is a stress
+test of its deviation scores, not unknown-attack detection validation. Generator
+noise can still produce overlapping styles in other families; this limitation
+is deliberate and is not evidence of genuinely unseen real-world attacks.
+
+Measured on 2026-10-05 using defaults (10 runs/family, 30 windows/run, intensity 1,
+noise .15, gap probability .02) and seeds 42/43/44, with no test-driven tuning:
+
+| Measure | Measured SIMULATION result |
+| --- | --- |
+| Random Forest macro-F1 mean / sample SD | 0.8806 / 0.0104 |
+| Fixed heuristic macro-F1 mean / sample SD | 0.7864 / 0.0245 |
+| Most-frequent macro-F1 mean / sample SD | 0.1059 / 0.0020 |
+| Complete test windows by seed | 293, 293, 291; missing 7, 7, 9 |
+| Random Forest conditional bootstrap intervals | [0.5567, 0.9028], [0.5228, 0.8933], [0.6767, 0.9148] |
+| Isolation Forest challenge recall by seed | 0.0551, 0.1852, 0.2901 |
+| False alerts per benign virtual hour | 2.1687, 9.1139, 2.2500 |
+| Excluded fanout fraction flagged | 0.0000, 0.4375, 0.5814 |
+| Three-seed study wall time | 13.41 seconds, excluding interpreter/import startup |
+
+The weak and variable anomaly recall is an important negative result. The
+conservative threshold and overlapping/noisy benign distributions often do not
+separate generated challenge windows. Do not hide it behind classifier accuracy
+or call the system a reliable intrusion detector. All data comes from the same
+generator; external-network generalization remains unknown. Saved evidence is
+ignored `artifacts/lab/repeated-seed-study-v2/benchmark.json`; the CLI reproduces
+the numerical results, while timing depends on the machine.
+
+Fresh scientific suite: 28 tests cover feature parity, no network I/O, deterministic
+seeds, whole-run splits, sidecar isolation, gap handling, bounds, cancellation,
+calibration/reference scope, test-label independence, actual SHAP additivity,
+trusted reload parity/tampering, hand-calculated metrics and grouped bootstrap.
+The final test outcome is recorded in plan.md. Temporal drift, feature ablations,
+external-data evaluation and any local LLM remain unfinished extensions; the
+single browser experiment does not silently include this separate study.
+
+Source inspection identified two issues for that stage: `ml/pipeline.py` uses
+fixed 180/60/60 row slices without ensuring complete runs stay in one partition,
+and `backend/detection/explain.py` has a static reference fallback. Do not copy
+those into the new experiment as verified run independence or learned references.
+Preserve historical results with their limitations; a corrected protocol needs
+new model/data versions and fresh evaluation, not relabelling of earlier results.
+
 Reduced scope, 2026-09-11: Sprint 4 delivers one Isolation Forest on genuine traffic-derived host features; Sprint 5 adds observed-feature explanations and labelled labs. The existing seven-field host-v1 contract and sensor/tests are unchanged. No model has been trained, loaded or evaluated by this cleanup.
 
 ## Scientific claim

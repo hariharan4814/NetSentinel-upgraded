@@ -1,5 +1,24 @@
 # Testing strategy
 
+## AI Lab acceptance — 2026-10-05
+
+The executable/result contract is [AI_LAB_CONTRACT.md](AI_LAB_CONTRACT.md).
+Run new independent tests with `.venv-lab/Scripts/python.exe -m unittest discover
+-s tests/lab -p "test_*.py"`; backend job tests stay in the existing Django suite,
+and frontend tests use existing npm/Playwright commands. Unit fixture data stays
+explicitly SIMULATION and never serves as evidence of live monitoring.
+
+Required gates: seeded metadata and shared-feature parity; no network emission;
+run/seed separation and train-only references; evaluation-sidecar independence;
+bounded/gap/cancel handling; persisted-model parity; actual SHAP additivity;
+hand-calculated metric denominators; auth/scope/CSRF/path/body boundaries; queue,
+lease expiry/restart and retention; real local worker-to-PostgreSQL completion;
+browser create/cancel/replay/report flow; semantic PDF content/pagination and
+static public export exclusion. Resource imports or a mock endpoint alone do
+not verify the complete workflow. Record failures and remaining scientific
+validation separately in plan.md, including unknown-family/drift experiments,
+repeated seeds, confidence intervals and actual laptop resource measurements.
+
 ## Public utility upgrade — 2026-10-01
 
 Consequential checks cover missing versus zero measurements, HTTP failure and

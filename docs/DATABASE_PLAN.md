@@ -1,5 +1,36 @@
 # Database plan
 
+## AI Lab persistence — implemented 2026-10-05
+
+`experiments.ExperimentJob` stores UUID identity, status/stage, UTC creation/update
+times, normalized bounded configuration, cancellation request, nullable progress
+counts, a fixed redacted failure description, bounded result JSON, a SHA-256 lease
+digest and lease expiry. Only SUCCEEDED rows can contain results; a conditional
+unique constraint permits one RUNNING job. Progress cannot exceed its total.
+Model artifacts are files in an owned ignored directory, never Django blobs or
+LIVE model registry entries. Index `(status,created_at)` supports admission/claim.
+
+`experiments.QueueGuard` is a singleton row (`id=1`). Three additive migrations
+create jobs, create the guard and seed it. Normal research runtime applies these
+to PostgreSQL with the original migrations preserved. PostgreSQL queue actions
+use an advisory transaction lock. Explicit `config.lab_settings` installs only
+`experiments` and uses a separate SQLite file; its guard UPDATE is the first
+statement in the transaction to serialize writers before reading queue state.
+This mode is an intentional runtime option (ADR-035), not automatic fallback.
+
+Admission permits four QUEUED jobs alongside one RUNNING job, retaining at most
+20 jobs by pruning oldest finished rows in `(created_at,id)` order. Active jobs
+are never evicted. A worker must renew its 30-second lease; expired jobs fail
+as interrupted on the next queue operation. Config/result bodies are validated
+and bounded, but the row cap does not automatically shrink the SQLite file. Back
+up or remove the separate lab database only while its processes are stopped.
+
+Temporary SQLite migration, concurrent admission/claim and a second-process
+persistence/recovery test pass. This is not PostgreSQL verification: the original
+local PostgreSQL service is unavailable and its data directory was preserved.
+Apply and verify new migrations there when the service is restored. Historical
+four/six-model descriptions below refer to their dated research milestones.
+
 ## Implemented initial Sprint 2 slice - 2026-09-13
 
 Exactly four models now exist: `monitoring.MonitoringSession` and
@@ -29,45 +60,29 @@ session manifests remain. These are the implemented bounds. The larger global
 row/byte admission, automatic cleanup and database throughput budgets below
 remain future proposals, not capabilities of this minimal backend.
 
-## Windows Companion SQLite schema v1 (2026-10)
+## Windows Companion SQLite schema v1 (source audit 2026-10-05)
 
-The Windows Companion operates a separate, isolated, private SQLite database stored at `%LOCALAPPDATA%\NetSentinel\state\companion.sqlite3`. It does **not** use PostgreSQL, Django models, or shared tables.
+The companion has its own private `%LOCALAPPDATA%\NetSentinel\state\companion.sqlite3`.
+It does not share the lab database or Django models. The following are the actual
+`companion/store.py` table names, correcting earlier logical-only entity names.
+`PRAGMA user_version=1`; unknown versions fail closed.
 
-### Design Principles
-- Strict versioning via `PRAGMA user_version = 1`. Startup checks reject unknown schemas fail-closed.
-- Timezone: All timestamps stored as UTC ISO-8601 strings.
-- Retention: Bounded retention (default 30 days for daily buckets, max 1000 flow events, max 500 audit events).
-- Zero packet payload: Persists only aggregated byte/packet counts and flow metadata.
+| Table | Stored fields and purpose |
+| --- | --- |
+| `apps` | Executable hash id, canonical path, name, protection flag, last-seen timestamp |
+| `usage` | `(app,day,mode)` key and observed upload/download IP byte totals; unassigned preserved |
+| `policies` | App key, daily/monthly quotas, warning percent, direction, auto-block flag, override deadline, manual intent |
+| `events` | Time, app, category, code, bounded message, provenance, unique deduplication marker |
+| `flows` | App, observation time, protocol, remote IP/port, upload/download bytes, provenance |
+| `destinations` | `(app,remote,mode)` key and last observation time |
+| `settings` | Key and JSON-encoded local preference value |
 
-### Entities
-1. `executables`:
-   - `id`: Canonical SHA-256 hash of the canonical lowercase Windows file path.
-   - `path`: Canonical Windows file path.
-   - `display_name`: Application executable name (e.g. `chrome.exe`).
-   - `first_seen_at`, `last_seen_at`: UTC timestamps.
-2. `daily_usage`:
-   - `app_id`: Foreign key to `executables(id)`.
-   - `day_utc`: UTC date string (`YYYY-MM-DD`).
-   - `inbound_bytes`, `outbound_bytes`: Cumulative observed IP bytes.
-   - `inbound_packets`, `outbound_packets`: Cumulative packet counts.
-   - Composite Primary Key: `(app_id, day_utc)`.
-3. `policies`:
-   - `app_id`: Primary key, references `executables(id)`.
-   - `mode`: `observe` or `enforce`.
-   - `daily_quota_bytes`, `monthly_quota_bytes`: Bounded byte thresholds (or null).
-   - `warn_percent`: Threshold percentage (default 80%) for advance warning.
-   - `manual_block`: Boolean override intent.
-   - `temporary_unblock_until`: UTC timestamp or null.
-4. `flow_events`:
-   - `id`: Auto-incrementing integer.
-   - `app_id`: Foreign key to `executables(id)` or null for unassigned flows.
-   - `observed_at`: UTC timestamp.
-   - `remote_ip`, `remote_port`, `protocol`: Flow endpoints.
-   - `bytes`, `direction`: Observed usage.
-   - `kind`: Event classification (`outbound_burst`, `new_destination`, `unusual_port`).
-5. `settings`:
-   - `key`: Primary key string.
-   - `value`: JSON-encoded string for local preferences (e.g., `enforcement: bool`, `retention_days: int`).
+Time values are UTC epoch seconds; daily usage keys are UTC date strings.
+Retention is 90 days of daily usage, up to 10,000 flow rows/7 days, 2,000 audit
+rows/90 days, and 5,000 destinations/30 days. Discovery is capped at 512 apps.
+No packet payload or URL field exists. The database has no per-process packet
+counter column; byte attribution remains the approximate collector's evidence.
+Retention does not certify a fixed SQLite file-size bound.
 
 PostgreSQL is the planned system of record for a simple local backend, introduced only in an authorized Sprint 2 after Sprint 1 passes. This is a logical contract, not migrations. Use UUID identifiers, timezone-aware UTC, foreign keys, explicit checks and versioned migrations. One database suffices; no time-series extension, per-mode database, job queue or event-sourcing system.
 

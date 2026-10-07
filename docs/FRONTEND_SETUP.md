@@ -1,5 +1,32 @@
 # Sprint 3 dashboard (Windows / PowerShell)
 
+## AI Lab interface — 2026-10-05
+
+`/lab` is the authenticated local simulation workbench. It shares the existing
+operator sign-in with `/local`; a separate server-only `NETSENTINEL_LAB_TOKEN`
+authorizes job creation/cancellation. Never place the worker key in Next.js.
+The fixed `/api/lab/jobs` relay accepts bounded settings, UUIDs and no commands
+or arbitrary URLs. Run a lab backend and `.venv-lab` worker as described in
+[AI_LAB_CONTRACT.md](AI_LAB_CONTRACT.md); the standalone launcher uses a separate
+SQLite store, while the original research stack retains PostgreSQL.
+
+The studio generates metadata, trains and evaluates real models in that worker.
+The interface displays actual stages, retained experiments, recorded-window
+playback with optional truth, missing observations, comparative metrics,
+confusion matrices, selected SHAP evidence and semantic PDF/JSON downloads.
+No metrics appear before a completed result. Every result is SIMULATION;
+statistical deviation is not proof of attack. Generated workloads send no packets.
+
+The vanilla CSS at `src/app/lab/lab.css` is scoped to the lab, with translucent
+surfaces, visible keyboard focus, semantic tables and responsive navigation.
+The static public allowlist excludes `/lab`, `/local` and all API routes.
+The browser fixtures in `tests/browser/lab.spec.ts` are explicitly synthetic
+UI checks; actual model/worker integration must be verified separately.
+
+Validation commands: `npm test`, `npm run lint`, `npm run typecheck`,
+`npm run build`, `npm run test:e2e`. Preserve local `next-env.d.ts` edits if
+Next regenerates this file. Detailed current evidence belongs in `plan.md`.
+
 **Current entry points (2026-10-01):** `/` now serves the public connection helper
 and needs no backend. The original monitoring dashboard described below is at
 `/local`; use `http://127.0.0.1:3000/local` for its UUID/mode workflow. The

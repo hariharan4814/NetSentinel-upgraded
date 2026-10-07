@@ -36,6 +36,8 @@ must be restarted to pick up authentication changes.
 | Read token | Django GET reads, including health; kept server-side by Next |
 | Ingestion token | POST monitoring-sessions, telemetry, windows, capture-status |
 | Model token | POST model-versions and anomaly-results metadata |
+| `NETSENTINEL_LAB_TOKEN` | POST lab jobs and cancellation only |
+| `NETSENTINEL_LAB_WORKER_TOKEN` | POST lab claim, heartbeat and finish only |
 
 Django requires `Authorization: Bearer <token>`. It accepts no browser cookies,
 rejects any Origin header and same-site/cross-site browser requests, requires an
@@ -120,3 +122,45 @@ sign out and repeat the read; change one key/restart and confirm old cookies fai
 Stop Django and verify the dashboard reports unavailable without discarding
 previously labelled historical observations. Restore Django and verify recovery.
 No migrations are introduced by authentication.
+
+## AI Lab runtime additions — 2026-10-05
+
+For manual lab startup add two further distinct random secrets: the lab token
+to Django and Next; the worker token to Django and the independent worker only.
+The worker reads its credential from the process environment, not a CLI flag or
+the repository `.env`. Never give the browser or Next the worker token. Next's
+operator password and read token continue to be required. `/lab` shares the local
+operator session; lab mutations additionally require its CSRF token, exact local
+Origin and `X-NetSentinel-Request: local-ui-v1`.
+
+Select `config.lab_settings` explicitly for a standalone simulation demonstration.
+It uses `NETSENTINEL_LAB_DATABASE_PATH` (default ignored
+`artifacts/lab/demo.sqlite3`), installs only the experiments app, and exposes no
+research telemetry/model routes. Supply `DJANGO_SECRET_KEY` of at least 50
+characters and the three distinct read/lab/worker tokens. There are no built-in
+runtime credentials and the original test-settings runtime prohibition remains.
+Original `config.settings` remains PostgreSQL; no private data is copied.
+
+After configuring secrets in your environment:
+
+```powershell
+.\.venv-backend\Scripts\python.exe backend/manage.py migrate --settings=config.lab_settings
+.\.venv-backend\Scripts\python.exe backend/manage.py runserver 127.0.0.1:8001 --noreload --settings=config.lab_settings
+# Separate ordinary terminal, with only the worker token supplied:
+.\.venv-lab\Scripts\python.exe -m lab.worker --base-url http://127.0.0.1:8001 --artifact-root artifacts/lab/worker
+```
+
+No administrator privileges, Npcap, PostgreSQL, security changes or external
+network calls are needed for simulation. Stop the worker with Ctrl+C: it
+terminates its own fit process and requests cancellation. If the backend cannot
+be reached, the 30-second lease marks the job interrupted on the next operation.
+An interrupted model fit is never resumed or presented as complete.
+The spawned fit also watches its parent's process handle and exits if the worker
+dies abruptly; it does not rely on a reusable PID. This behaviour has a Windows
+spawned-process regression, in addition to mocked cancellation/timeout tests.
+
+Worker artifact cleanup only removes marked UUID subdirectories it owns; other
+files remain. The default maximum is 20 runs and a 500 MiB root budget, checked
+between heartbeat intervals. The fit has a 600-second time limit. These are
+application bounds rather than an OS disk/memory sandbox; a local account remains
+trusted. Use a dedicated artifact directory, separate from the SQLite database.
