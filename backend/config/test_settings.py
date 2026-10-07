@@ -8,3 +8,9 @@ if len(sys.argv) < 2 or sys.argv[1] not in {"test", "check", "makemigrations"}:
 
 SECRET_KEY = "test-only-not-a-runtime-secret-" * 3
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}}
+# Deliberately public synthetic fixture values; never valid runtime credentials.
+NETSENTINEL_READ_TOKEN = "fixture-read-only-not-for-runtime-0001"
+NETSENTINEL_INGEST_TOKEN = "fixture-ingest-not-for-runtime-0002"
+NETSENTINEL_MODEL_TOKEN = "fixture-model-not-for-runtime-00003"
+NETSENTINEL_LAB_TOKEN = "fixture-lab-job-not-for-runtime-0004"
+NETSENTINEL_LAB_WORKER_TOKEN = "fixture-lab-worker-not-for-runtime-05"

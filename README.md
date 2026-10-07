@@ -1,52 +1,110 @@
-# NetSentinel — make sense of your connection
+# NetSentinel AI Lab
 
-NetSentinel now has a public-facing connection helper for everyday people:
-run a small browser check, understand the result, follow practical troubleshooting
-steps, and save a report for support. No account, Python, database or capture
-driver is needed for this public experience.
+An explainable network anomaly detection and traffic simulation prototype for
+M.Sc. Computer Science. Generate virtual metadata, train real models, evaluate
+held-out runs, inspect explanations and export reports. All lab results are
+labelled **SIMULATION**; no attack traffic is emitted.
 
-**[Open NetSentinel](https://netsentinel-connect.hariharan4814.chatgpt.site)** —
-public deployment confirmed on 2026-10-01.
+Start with [AI Lab setup and viva steps](docs/AI_LAB_SETUP.md). The active
+[execution plan](plan.md), [design plan](designplan.md) and [handoff](YT.md)
+record current verification and remaining work. The local `/lab` experience
+preserves the public connection helper, `/local` research monitor and Windows
+companion below. Public hosting does not expose the local AI worker or controls.
 
-## What you can do
+External resources were downloaded before coding. The isolated `.venv-lab`
+runtime now uses the [hash-pinned requirements](requirements-lab.lock); see the
+[resource inventory](resources/ai-lab/README.md) for sources and licenses.
 
-- Run/cancel eight HTTP checks to this website; see actual response times and
-  failed requests. This is not a speed test or packet-loss measurement.
-- Follow steps for slow browsing, frozen calls, disconnections or a failing site.
-- Optionally keep 10 recent checks for 7 days in this browser, compare them and
-  delete them. History is off by default.
-- Download a plain-text check summary with its method, source and limitations.
-- Estimate a file's download time from a speed you enter.
-- Read the in-app **How it works** section for usage, privacy and limitations.
+## Existing supporting applications
+NetSentinel delivers three cohesive experiences:
+1. **Public Web Utility**: A zero-setup browser tool for everyday users to check connectivity, measure real download/upload speed, look up their provider, follow guided troubleshooting, and export support PDFs.
+2. **Windows Companion (Developer Preview 0.2.0)**: A loopback-authenticated desktop dashboard providing per-application traffic accounting, daily/monthly quotas, opt-in Windows Firewall enforcement, Microsoft Defender status & scan controls, and private PDF reports.
+3. **Research Network Monitor & Anomaly Engine (`/local`)**: An M.Sc. dissertation system providing host-centric telemetry (Npcap/psutil on `Ethernet 3`), unsupervised Isolation Forest anomaly detection on 7 frozen host-v1 features, and deterministic feature explainability.
 
-## Start the upgraded app locally
+**[Open Public NetSentinel](https://netsentinel-connect.hariharan4814.chatgpt.site)** — public deployment confirmed on 2026-10-01.
 
+---
+
+## 1. Public Web Utility (Static Web App)
+
+- **Connectivity Probes**: 8 sequential same-origin HTTP probes measuring median latency, jitter/range, and failure counts.
+- **Measured Speed Testing**: User-initiated Cloudflare speed test integration (`@cloudflare/speedtest`) with bounded payload budgets (nominal 15.5 MB, max 62 MB cap). Measures real application throughput, never wire estimates.
+- **Visitor Provider Lookup**: Direct client-side `ipwho.is` lookup (consent-gated, default-redacted IP and location).
+- **Client-Side Support Reports**: Bounded 7-day browser history and downloadable semantic PDF reports (`jspdf`).
+- **Guided Troubleshooting**: Symptom-based step-by-step checklists for slow browsing, video call drops, and complete outages.
+
+### Build and Run Public Frontend
 ```powershell
 cd C:\Users\yuvas\Desktop\NetSentinel\frontend
 npm ci
 npm run build
 npm run start
 ```
+*Open `http://127.0.0.1:3000` in your browser.*
 
-Open `http://127.0.0.1:3000`. The new homepage works without Django. Local check
-results are labelled LOCAL because a response from your computer does not test
-the internet. The original technical monitor is preserved at `/local`; its
-existing backend and sensor requirements still apply. Use Node 22+ (Node 24.19.0
-was used in this upgrade). Remote font downloads were removed.
+To generate the strictly allowlisted public static bundle:
+```powershell
+npm run build:public
+```
+*Outputs to `public-release/dist` with zero local routes, APIs, or private assets. See [PUBLIC_RELEASE.md](docs/PUBLIC_RELEASE.md).*
 
-The public distribution is an allowlisted static export, built with
-`npm run build:public`, into `public-release/dist`. It does **not** include the
-local API, sensor, database or `/local`. Never publish the whole repository or
-the ordinary local Next server as a substitute. See [public release guide](docs/PUBLIC_RELEASE.md).
+---
 
-Detailed analysis and implementation sequence: [plan.md](plan.md).
-Visual direction and vanilla CSS specification: [designplan.md](designplan.md).
+## 2. Windows Companion (Installed Developer Preview v0.2.0)
 
-## Historical research implementation
+- **Traffic Accounting**: Real-time packet-to-socket attribution grouped by canonical SHA-256 executable IDs. Bounded SQLite v1 storage (`companion.sqlite3`).
+- **Quotas & Enforcement**: Daily and monthly byte quotas, 80% warning alerts, and opt-in Windows Firewall rules (`NetSecurity` cmdlets). Non-destructive, lease-gated (30s heartbeat expiry), with automatic rollback and recovery (`Recover.ps1`).
+- **Windows Security Queries**: Real-time query of Microsoft Defender status (signatures, engine, active protection) and all three Windows Firewall profiles (Domain, Private, Public).
+- **Explicit Defender Scans**: User-triggered Quick or Full scans via Defender cmdlets with explicit consent.
+- **Private Semantic PDF Reports**: Vector-styled reports via ReportLab with user-selected date ranges and default redaction of file paths and IP addresses.
 
-The material below documents the earlier academic product and its recorded
-evidence. Its test totals and capability claims are historical, not fresh
-verification of this upgrade. ADR-028 defines the new public boundary.
+### Start the Companion Locally
+```powershell
+cd C:\Users\yuvas\Desktop\NetSentinel
+# 1. Initialize local state and tokens:
+.\.venv\Scripts\python.exe -m companion init
+
+# 2. Start the companion dashboard service:
+.\.venv\Scripts\python.exe -m companion serve
+```
+*Open `http://127.0.0.1:8765`. Find your local login key in `%LOCALAPPDATA%\NetSentinel\state\access.token`.*
+
+To run the optional privileged broker for firewall rules and Defender scans:
+```powershell
+# Open an elevated Administrator PowerShell window:
+.\companion\packaging\Start-Broker.ps1
+```
+*See [COMPANION_SETUP.md](docs/COMPANION_SETUP.md) and [COMPANION_UPGRADE.md](docs/COMPANION_UPGRADE.md).*
+
+---
+
+## 3. Local Research Stack & Anomaly Engine (`/local`)
+
+An M.Sc. dissertation project delivering host-centric network telemetry, unsupervised Isolation Forest anomaly detection, deterministic feature-level explainability, and a modern web dashboard.
+
+### Start Backend and Research Dashboard
+```powershell
+# Terminal 1 - Django REST Backend (port 8001):
+cd C:\Users\yuvas\Desktop\NetSentinel
+.\.venv-backend\Scripts\python.exe backend/manage.py runserver 127.0.0.1:8001
+
+# Terminal 2 - Next.js Local Monitor (port 3000):
+cd C:\Users\yuvas\Desktop\NetSentinel\frontend
+npm run dev -- -p 3000
+```
+*Access `/local` at `http://127.0.0.1:3000/local`. Operator sign-in requires credentials configured in `docs/LOCAL_AUTH.md`.*
+
+---
+
+## Automated Test Verification Summary
+
+- **Companion Unit & Integration Tests**: **58 / 58 passing** (`companion/tests/`).
+- **Sensor Tests**: **3 / 3 passing** (`tests/`).
+- **Backend Django REST Tests**: **56 / 56 passing** (`backend/tests/`). Database migrations clean (`makemigrations --check --dry-run`).
+- **Frontend Unit Tests**: **52 / 52 passing** (`frontend/tests/`).
+- **Frontend E2E Browser Tests**: **29 / 29 passing**, 1 skipped opt-in (`frontend/tests/browser/`).
+- **Code Quality**: ESLint 0 warnings, TypeScript 0 errors, Next.js production build clean.
+
 
 # Local network monitoring & explainable anomaly detection
 

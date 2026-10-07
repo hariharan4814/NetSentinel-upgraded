@@ -3,9 +3,11 @@ from uuid import uuid4
 from django.utils import timezone
 from rest_framework.test import APITestCase
 from monitoring.models import CaptureStatus, MonitoringSession
+from .support import ScopedFixtureClient
 
 
 class MonitoringReadTests(APITestCase):
+    client_class = ScopedFixtureClient
     def setUp(self):
         self.client.defaults["HTTP_HOST"] = "localhost"
         self.now = timezone.now()

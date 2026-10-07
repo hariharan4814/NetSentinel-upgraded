@@ -1,4 +1,5 @@
-import { test, expect, type Page, type Route } from "@playwright/test";
+import { type Page, type Route } from "@playwright/test";
+import { test, expect } from "./local-fixture";
 const session = "11111111-1111-1111-1111-111111111111";
 const run = "33333333-3333-3333-3333-333333333333";
 

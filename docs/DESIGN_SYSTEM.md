@@ -1,5 +1,24 @@
 # Design system
 
+## AI Lab implementation — 2026-10-06
+
+`/lab` uses scoped vanilla CSS: a deep teal navigation rail, cool translucent
+panels, readable system fonts and explicit SIMULATION badges. The page follows
+scenario studio → retained experiments → computed evidence → how-to. The rail
+becomes compact navigation below 760px; forms and evidence panels stack, and
+wide numeric tables scroll within labelled keyboard-focusable regions.
+
+States include sign-in, loading, empty store, queued/running/cancellation,
+failed jobs, unscored observations, disconnected backend and retained historical
+results. No illustrative metrics populate empty states. Playback shows recorded
+test windows, never live traffic; generated truth is an explicit overlay.
+The evidence view presents actual metrics and SHAP output with limitations.
+PDFs contain semantic tables and charts with pagination, not UI screenshots.
+This scope supersedes the historical prohibition on lab job controls below.
+
+Automated 360px overflow checks and production browser workflow checks passed
+on 2026-10-06. Visual and rendered-PDF review evidence belongs in `plan.md`.
+
 ## Current public design — 2026-10-01
 
 The public connection helper follows ../designplan.md: vanilla CSS, deep teal

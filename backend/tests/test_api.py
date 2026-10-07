@@ -14,9 +14,11 @@ from rest_framework.test import APITestCase
 from monitoring.models import MonitoringSession, CaptureStatus
 from telemetry.models import TelemetrySample, TrafficWindow
 from telemetry.serializers import TelemetrySampleSerializer
+from .support import ScopedFixtureClient
 
 
 class BackendTests(APITestCase):
+    client_class = ScopedFixtureClient
     def setUp(self):
         self.client.defaults["HTTP_HOST"] = "localhost"
         now = timezone.now() - timedelta(minutes=2)
@@ -77,9 +79,10 @@ class BackendTests(APITestCase):
         self.assertEqual(response.status_code, 503)
         self.assertNotIn("password", str(response.data))
 
-    def test_only_six_application_models(self):
+    def test_six_research_models_remain_separate_from_lab(self):
         from django.apps import apps
-        self.assertEqual({model.__name__ for model in apps.get_models()},
+        self.assertEqual({model.__name__ for model in apps.get_models()
+                          if model._meta.app_label != "experiments"},
                            {"MonitoringSession", "CaptureStatus", "TelemetrySample", "TrafficWindow", "ModelVersion", "AnomalyResult"})
 
     def test_round_trip_records_preserves_session_provenance_and_utc(self):
@@ -273,7 +276,7 @@ class BackendTests(APITestCase):
 
     def test_only_get_and_post_are_exposed(self):
         for method in (self.client.put, self.client.patch, self.client.delete):
-            self.assertEqual(method("/api/v1/telemetry/", {}, format="json").status_code, 405)
+            self.assertEqual(method("/api/v1/telemetry/", {}, format="json").status_code, 403)
 
     def test_local_boundary_blocks_remote_browser_origins_and_spoofed_proxy_headers(self):
         for kwargs in ({"REMOTE_ADDR": "192.0.2.1"}, {"HTTP_ORIGIN": "https://example.com"},

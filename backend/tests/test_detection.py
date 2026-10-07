@@ -7,9 +7,11 @@ from rest_framework.test import APITestCase
 from detection.contract import FEATURE_NAMES, PARAMETERS, profile, eligible
 from detection.models import ModelVersion, AnomalyResult
 from telemetry.models import TrafficWindow
+from .support import ScopedFixtureClient
 
 
 class DetectionTests(APITestCase):
+    client_class = ScopedFixtureClient
     def setUp(self):
         self.client.defaults["HTTP_HOST"] = "localhost"
         start = (timezone.now() - timedelta(minutes=3)).replace(second=0, microsecond=0)
