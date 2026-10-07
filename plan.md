@@ -10,6 +10,30 @@ Implementation commits: `c233830` and final report correction `9a3d1ae`.
 The documentation checkpoint follows those commits; use `git log -3 --oneline`
 for its own commit ID. No merge into the default branch is authorized.
 
+### Final release checkpoint — 2026-10-08
+
+Core implementation and handoff are complete. Source/documentation through
+`ab922ca` are pushed to `origin/codex/ai-lab-prototype`; the final record below is
+saved in the following documentation-only commit. Draft PR created and verified:
+https://github.com/hariharan4814/NetSentinel-upgraded/pull/1 (`draft: true`, base main).
+It includes the earlier unmerged companion/public foundation commits; no merge.
+Existing Git authentication supported the GitHub API through its credential helper;
+credentials were held only in process memory, never written or printed.
+
+Source artifact: `artifacts/release/NetSentinel-AI-Lab-source.zip`, commit `ab922ca`,
+307 entries, 760660 bytes, SHA256
+`26d6be6cd8bcf69d318c61174a7a6e7dfc4bb9dfea974820d7c463ce1691a8b6`.
+ZIP inventory inspected: no .env/private databases/models/captures/dependency
+cache. Manifest alongside the ZIP. This artifact intentionally represents the
+reviewed source checkpoint; this final release-status paragraph is later history.
+Setup, contracts, tests and complete working core are already inside the archive.
+
+**Next action: demonstrate or review, not more core coding.** Read the draft PR,
+start the launcher using the setup guide, and retain the ignored evidence/cache
+when moving machines. Optional work and external blockers below remain separate.
+A8 local integration/source handoff is VERIFIED; remote public AI publication and
+production Windows release are not claimed. All QA processes are stopped.
+
 ### Implemented and verified scope
 
 - Independent seeded metadata simulator: routine/bulk-transfer benign roles and
@@ -99,12 +123,9 @@ To demonstrate now: follow `docs/AI_LAB_SETUP.md`; from repository root run
 and open its /lab URL. No admin, capture driver or paid API is needed. Ctrl+C
 stops owned processes. Do not run Django test settings as a server.
 
-Final release housekeeping: record the documentation commit, generate and inspect
-the committed source ZIP per `docs/AI_LAB_RELEASE.md`, push this dedicated branch
-if Git authentication permits, and create a draft PR only if an authorized GitHub
-workflow is available. Git read access passed; `gh` and a PR creation connector
-were not available at this checkpoint. Never merge main. If those external steps
-remain unavailable, retain the local commits/artifact and report the limitation.
+Release housekeeping is complete as recorded above. The original live/production
+and optional research gates remain explicitly limited; do not reopen core work
+unless the user requests a new change or reports a reproducible defect.
 
 ## Historical execution checkpoints (superseded by Resume Here)
 
@@ -563,7 +584,7 @@ tests/evidence appropriate to the claim. Tasks A1–A8 are the core dissertation
 | A5 | Django experiment metadata/migrations, bounded worker/API and auth | VERIFIED | Fresh DB migration and upgrade checks; unauthorized/origin/path requests rejected; lease/cancel/restart/retention tests; CLI still independent |
 | A6 | Next `/lab` Scenario Studio, Training, Detection, Explain & Compare | VERIFIED | Complete user workflow uses computed data; real stage states; usable keyboard/mobile layouts; honest empty/failed/unscored states |
 | A7 | Experiment PDF/JSON exports, viva guide and offline demo setup | VERIFIED | Rendered sample PDF visually inspected; privacy/pagination tests; seeded rerun reproducible; offline demo completes on Windows without admin/Npcap |
-| A8 | Integrated QA, laptop resource measurements, scientific results and release handoff | IMPLEMENTED | Relevant regression suites, lint/types/build, public exclusion checks, measured limitations, locked dependencies/notices and reviewable commits |
+| A8 | Integrated QA, laptop resource measurements, scientific results and release handoff | VERIFIED | Relevant regression suites, lint/types/build, public exclusion checks, measured limitations, locked dependencies/notices and reviewable commits |
 | E1 | Optional local AI assistant | DEFERRED | Starts only with chosen runtime/model; cited factual answers, numeric-grounding and prompt-injection tests; graceful absent-runtime state |
 | E2 | Optional CICIDS2017 benchmark | BLOCKED | Terms/citation recorded; separate feature schema and leakage audit; held-out results and limited claims; core still offline |
 | E3 | Optional public simulation showcase | DEFERRED | Public data allowlist reviewed; recorded source labelled; no local APIs/model weights/secrets; deployed primary flow verified if hosting available |

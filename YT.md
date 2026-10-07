@@ -29,7 +29,11 @@ Remaining work is outside the verified core: PostgreSQL installation/integration
 BLOCKED; external dataset access BLOCKED; optional LLM/public AI showcase,
 drift/ablation and production Windows release/signing DEFERRED. Do not fabricate
 completion or re-run old capture/control actions to make the AI demo look LIVE.
-Source release/PR status is recorded in the final release checkpoint in plan.md.
+Source release is prepared and the review branch is pushed. Draft PR:
+https://github.com/hariharan4814/NetSentinel-upgraded/pull/1 (not merged).
+Source ZIP: `artifacts/release/NetSentinel-AI-Lab-source.zip`, commit `ab922ca`.
+Its hash, inventory, evidence and exact remaining external procedures are in the
+final release checkpoint in plan.md. Stop core work; demonstrate or review next.
 
 ## Historical handoff entries
 
