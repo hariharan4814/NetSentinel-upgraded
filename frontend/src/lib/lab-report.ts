@@ -63,6 +63,7 @@ export function createLabPdf(result: LabResult) {
   heading("Isolation Forest deviation");
   table(["Metric", "Value"], Object.entries(model.anomaly).map(([key, value]) => [key.replaceAll("_", " "), labNumber(value)]));
   paragraph("False alerts per hour uses benign virtual observation time. Average precision ranks injected challenge labels by deviation. Deviation scores and classifier output are not attack probabilities; legitimate bulk transfers can also look unusual.");
+  room(model.explanations.length ? 145 : 40);
   heading("Selected explanation evidence");
   if (!model.explanations.length) paragraph("No explanation evidence was available for the selected experiment.");
   for (const explanation of model.explanations.slice(0, 8)) {
@@ -73,6 +74,7 @@ export function createLabPdf(result: LabResult) {
     table(["Feature", "Observed", "Training p95", "Contribution"], explanation.features.map(feature => [feature.feature, labNumber(feature.value), labNumber(feature.reference_p95), labNumber(feature.contribution, 5)]));
   }
   paragraph(`Explanation cases shown: ${Math.min(8, model.explanations.length)} of ${model.explanations.length}. The JSON export retains all recorded explanation cases. Contributions explain model output, not causation or proof of an attack.`);
+  room(110);
   heading("Measured runtime");
   table(["Measure", "Value"], Object.entries(model.performance).map(([key, value]) => [key.replaceAll("_", " "), labNumber(value)]));
   heading("Limits and privacy");

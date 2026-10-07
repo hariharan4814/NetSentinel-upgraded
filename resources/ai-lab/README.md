@@ -7,9 +7,8 @@ no downloaded source, notebook or model code was executed.
 ## Implementation update — 2026-10-05
 
 The acquisition record below is historical. The 20 pinned wheels have since been
-installed offline into the separate .venv-lab environment and exercised by real
-training and SHAP tests. 
-equirements-lab.lock is the application runtime lock.   
+installed offline into the separate `.venv-lab` environment and exercised by real
+training and SHAP tests. `requirements-lab.lock` is the application runtime lock.
 Optional dataset CSV and LLM weights remain unavailable/deferred as listed.
 
 ## What was acquired
