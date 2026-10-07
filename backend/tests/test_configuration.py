@@ -39,7 +39,7 @@ class ConfigurationTests(SimpleTestCase):
         self.assertEqual(settings.DATABASES["default"]["HOST"], "127.0.0.1")
         self.assertEqual(settings.DATABASES["default"]["NAME"], "fixture_db")
         self.assertFalse(settings.DEBUG)
-        self.assertEqual(settings.INSTALLED_APPS, ["rest_framework", "monitoring", "telemetry", "detection"])
+        self.assertEqual(settings.INSTALLED_APPS, ["rest_framework", "monitoring", "telemetry", "detection", "experiments"])
 
     def test_required_configuration_fails_without_secrets_or_database_values(self):
         for name in ("DJANGO_SECRET_KEY", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD"):

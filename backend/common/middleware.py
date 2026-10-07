@@ -1,11 +1,12 @@
 """Loopback transport and method/route-scoped machine authentication.
 
 No browser cookies are accepted here. The local Next server authenticates its
-operator separately and holds only the read credential. No trusted proxies.
+operator separately and holds read and lab-job credentials. No trusted proxies.
 """
 from ipaddress import ip_address
 import hashlib
 import hmac
+import re
 from django.core.exceptions import RequestDataTooBig
 from django.http import JsonResponse
 from django.conf import settings
@@ -33,6 +34,8 @@ class LocalOnlyMiddleware:
             "read": settings.NETSENTINEL_READ_TOKEN,
             "ingest": settings.NETSENTINEL_INGEST_TOKEN,
             "model": settings.NETSENTINEL_MODEL_TOKEN,
+            "lab": settings.NETSENTINEL_LAB_TOKEN,
+            "lab_worker": settings.NETSENTINEL_LAB_WORKER_TOKEN,
         }
         def valid(value):
             return isinstance(value, str) and 32 <= len(value) <= 256 and value.isascii() and not any(c.isspace() for c in value) and not value.startswith("replace-with-")
@@ -50,14 +53,30 @@ class LocalOnlyMiddleware:
             return reject("invalid_or_unconfigured_credential", 401)
         ingestion_paths = {f"/api/v1/{name}/" for name in ("monitoring-sessions", "telemetry", "windows", "capture-status")}
         model_paths = {"/api/v1/model-versions/", "/api/v1/anomaly-results/"}
+        job_mutation = re.fullmatch(r"/api/v1/lab/jobs/(?:[0-9a-f-]{36}/cancel/)?", request.path)
+        worker_mutation = re.fullmatch(r"/api/v1/lab/worker/(?:claim/|[0-9a-f-]{36}/(?:heartbeat|finish)/)", request.path)
         permitted = ((scope == "read" and request.method == "GET")
                      or (scope == "ingest" and request.method == "POST" and request.path in ingestion_paths)
-                     or (scope == "model" and request.method == "POST" and request.path in model_paths))
+                     or (scope == "model" and request.method == "POST" and request.path in model_paths)
+                     or (scope == "lab" and request.method == "POST" and job_mutation)
+                     or (scope == "lab_worker" and request.method == "POST" and worker_mutation))
         if not permitted:
             return reject("credential_scope_forbidden", 403)
+        # Authenticate and scope-check BEFORE granting the one larger body cap.
+        # Read the stream with a bounded read so the global Django limit stays
+        # 64 KiB for existing routes and cannot be raced by another request.
+        limit = (4 * 1024 * 1024 if scope == "lab_worker" and request.path.endswith("/finish/")
+                 else settings.DATA_UPLOAD_MAX_MEMORY_SIZE)
         try:
-            if len(request.body) > settings.DATA_UPLOAD_MAX_MEMORY_SIZE:
+            length = request.META.get("CONTENT_LENGTH", "")
+            if length and (not length.isdecimal() or int(length) > limit):
                 raise RequestDataTooBig
+            body = request.read(limit + 1)
+            if len(body) > limit:
+                raise RequestDataTooBig
+            from io import BytesIO
+            request._body = body
+            request._stream = BytesIO(body)
         except RequestDataTooBig:
             return reject("request_too_large", 413)
         response = self.get_response(request)

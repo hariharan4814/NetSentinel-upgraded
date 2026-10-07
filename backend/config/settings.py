@@ -21,6 +21,8 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
 NETSENTINEL_READ_TOKEN = os.environ.get("NETSENTINEL_READ_TOKEN", "")
 NETSENTINEL_INGEST_TOKEN = os.environ.get("NETSENTINEL_INGEST_TOKEN", "")
 NETSENTINEL_MODEL_TOKEN = os.environ.get("NETSENTINEL_MODEL_TOKEN", "")
+NETSENTINEL_LAB_TOKEN = os.environ.get("NETSENTINEL_LAB_TOKEN", "")
+NETSENTINEL_LAB_WORKER_TOKEN = os.environ.get("NETSENTINEL_LAB_WORKER_TOKEN", "")
 DATABASES = {"default": {
     "ENGINE": "django.db.backends.postgresql",
     "NAME": required("POSTGRES_DB"),

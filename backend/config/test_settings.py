@@ -12,3 +12,5 @@ DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memor
 NETSENTINEL_READ_TOKEN = "fixture-read-only-not-for-runtime-0001"
 NETSENTINEL_INGEST_TOKEN = "fixture-ingest-not-for-runtime-0002"
 NETSENTINEL_MODEL_TOKEN = "fixture-model-not-for-runtime-00003"
+NETSENTINEL_LAB_TOKEN = "fixture-lab-job-not-for-runtime-0004"
+NETSENTINEL_LAB_WORKER_TOKEN = "fixture-lab-worker-not-for-runtime-05"

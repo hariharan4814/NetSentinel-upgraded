@@ -14,6 +14,7 @@ credentials/
 .venv/
 .venv-backend/
 .venv-ml/
+.venv-lab/
 venv/
 env/
 __pycache__/
@@ -70,6 +71,9 @@ companion-state/
 *.token
 .venv-companion/
 output/
+
+# External AI Lab reference downloads: inventory is tracked, bulk content is local.
+/resources/ai-lab/downloads/
 
 # Operating system and editor local state
 Thumbs.db

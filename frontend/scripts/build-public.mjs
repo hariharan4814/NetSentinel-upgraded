@@ -20,7 +20,7 @@ await writeFile(path.join(stage, "next.config.ts"), 'import type { NextConfig } 
 const result = spawnSync(process.execPath, [path.join(frontend, "node_modules/next/dist/bin/next"), "build", stage], { cwd: frontend, stdio: "inherit" });
 if (result.status !== 0) process.exit(result.status ?? 1);
 const out = path.join(stage, "out");
-for (const forbidden of ["api", "local", "local.html", ".env", "backend", "sensor"]) {
+for (const forbidden of ["api", "local", "local.html", "lab", "lab.html", "artifacts", "resources", ".env", "backend", "sensor"]) {
   if (existsSync(path.join(out, forbidden))) throw new Error(`Unsafe public output: ${forbidden}`);
 }
 await mkdir(release, { recursive: true });
