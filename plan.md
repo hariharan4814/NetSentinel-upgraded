@@ -1,5 +1,76 @@
 # NetSentinel AI Lab — execution plan and durable handoff
 
+## Resume Here — academic Word documentation VERIFIED 2026-10-09
+
+**The requested Word report is complete. Stop work unless the user requests a
+revision.** Final deliverable:
+`output/doc/NetSentinel_Complete_Project_Report.docx` (1,487,761 bytes).
+SHA256: `7f7149dacddc8193850849a7d906a2b0941f19840501da80f4a5b23236a8b013`.
+This local output directory is ignored by Git; preserve/copy the DOCX when moving
+machines. It has not been added to the source ZIP, committed or published.
+
+The report contains 74 pages, ten chapters, an abstract, populated Word contents,
+lists of figures and tables, bibliography and six appendices. Its 12 figures
+include architecture, job states, context/level 1/level 2 DFDs, the analysis
+workflow, data splitting, research and companion entity relationships, measured
+charts and a labelled simulation screenshot. Forty tables include requirements,
+results, testing and the actual database dictionary. Setup, API contracts,
+limitations, demonstration steps and viva preparation are included.
+Times New Roman is verified with 14 pt headings and 12 pt body/table text.
+Cover identity fields remain editable placeholders at the user's explicit request.
+
+Source checkpoint remains `codex/ai-lab-prototype` / `d0fbbb1`. No application
+source, dependencies, migrations or user edits were changed for this task.
+The existing `frontend/next-env.d.ts` working-tree change remains untouched.
+The report cites recorded implementation/test evidence and measured simulation
+results; those application tests were not rerun just to author the report.
+It distinguishes completed prototype capabilities from production Windows,
+PostgreSQL, external-dataset and public AI deployment limitations below.
+
+### Documentation implementation and verification record
+
+- VERIFIED: prose and source/schema evidence review, ten chapters and appendices.
+  Authoring sources are under ignored `tmp/project-report/report.md`,
+  `build_report.py` and `assets.py`; final minor edits are in `final_polish.py`.
+- VERIFIED: native Microsoft Word field updates, pagination and export using
+  `tmp/project-report/render_word.ps1`; Word reports 74 pages, 16,062 words,
+  40 tables, 12 inline figures, one contents list and two figure/table lists.
+- VERIFIED: every rendered page individually inspected. Final repairs moved
+  connector labels on pages 21/30/32, added diagram padding on page 25 and fixed
+  a database type wrap on page 64. All five corrected pages were reinspected.
+  Pixel comparison confirms all other pages are identical to reviewed pages;
+  normalized page text and pagination are unchanged.
+- VERIFIED: bundled documents `a11y_audit.py` returned zero high, medium or low
+  findings. Report: `tmp/project-report/a11y-delivery.json`.
+- VERIFIED: `tmp/project-report/check_final.py` checked 74-page pagination,
+  table/figure totals, inherited Times New Roman styles, 14/12 pt sizes, retained
+  placeholders, changed-page comparison and final SHA256. Evidence:
+  `tmp/project-report/delivery_qa.json`.
+- Rendering limitation and resolution: the packaged LibreOffice renderer is
+  unavailable on this Windows runtime. Native Word export and bundled Poppler
+  supplied actual page images instead. Poppler warned about unused Symbol and
+  ArialUnicode display font mappings; the report's Times New Roman text and
+  equations were visually checked, with no missing glyphs.
+- Resolved authoring failures: an earlier export encountered a file in use;
+  final QA used a distinct DOCX/output PDF and awaited export before rendering.
+  A table replacement initially matched the wrong literal (no DOCX saved), then
+  was corrected against the actual cell. A style check initially ignored Word's
+  font inheritance; inspection confirmed headings inherit Times New Roman from
+  Normal, and the effective-style check passed. No tests were weakened to hide
+  an output defect.
+
+Final internal QA artifacts: `tmp/project-report/report-delivery.pdf` and
+`tmp/project-report/delivery-review/page-01.png` through `page-74.png`.
+These are review intermediates; the requested deliverable is the DOCX only.
+The final Word render process completed and closed its report document. No project
+server or training worker was launched for this documentation task. Unrelated or
+uncertain-ownership Word processes were not force-terminated.
+
+**Exact next action:** open the final DOCX to read or submit it; replace cover
+placeholders only when the user supplies identity details. Do not rebuild from
+the older builder output filename or restart application implementation. Report
+task has no remaining blocker. Historical implementation handoff follows.
+
 ## Resume Here — 2026-10-07: core prototype verified
 
 **Stop core implementation.** The requested local AI prototype is implemented and
